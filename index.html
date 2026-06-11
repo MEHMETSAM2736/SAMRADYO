@@ -140,6 +140,8 @@ main{
 }
 .playpause:active{transform:scale(.93)}
 .playpause.loading{opacity:.6;pointer-events:none}
+.playpause.ready{animation:ppulse 1.6s ease-in-out infinite}
+@keyframes ppulse{0%{box-shadow:0 0 0 0 rgba(0,122,255,.7)}70%{box-shadow:0 0 0 22px rgba(0,122,255,0)}100%{box-shadow:0 0 0 0 rgba(0,122,255,0)}}
 
 .pp-icon{width:28px;height:28px;fill:#fff}
 
@@ -233,7 +235,7 @@ footer{
       </div>
     </div>
 
-    <audio id="au" preload="none"></audio>
+    <audio id="au" preload="auto" playsinline webkit-playsinline></audio>
   </main>
 
   <footer>
@@ -267,11 +269,13 @@ var dbgEl    = document.getElementById("dbg");
 var PLAY_D  = "M8,5 L8,19 L19,12 Z";
 var PAUSE_D = "M6,4 L10,4 L10,20 L6,20 Z M14,4 L18,4 L18,20 L14,20 Z";
 
-var baseUrl   = "";
-var isPlaying = false;
-var songId    = -1;
-var sse       = null;
+var baseUrl    = "";
+var isPlaying  = false;
+var playReq    = false; // kullanici beklerken sunucu bulunsun
+var songId     = -1;
+var sse        = null;
 var retryTimer = null;
+var connTimer  = null; // baglanti zamani asimi
 
 au.volume = 0.85;
 
@@ -313,29 +317,46 @@ function setSong(name, id){
 function startStream(){
   if(!baseUrl || !isPlaying) return;
   clearTimeout(retryTimer);
+  clearTimeout(connTimer);
+  ppBtn.classList.remove("ready");
   setLoading(true);
   setStatus("Bağlanıyor...", "warn");
 
   au.src = baseUrl + "/stream?t=" + Date.now();
-  au.load();
+  // DİKKAT: au.load() KULLANMA! iOS'ta kullanici hareketi zincirini kirar
 
-  var p = au.play();
-  if(p instanceof Promise){
-    p.catch(function(){
+  connTimer = setTimeout(function(){
+    if(ppBtn.classList.contains("loading")){
       setLoading(false);
-      setStatus("▶ Başlatmak için tıkla", "");
+      setStatus("Zaman aşımı, tekrar dene", "warn");
       isPlaying = false;
       setIcon(false);
       setViz(false);
       setPill(false);
-    });
+    }
+  }, 15000);
+
+  var p = au.play();
+  if(p && typeof p.catch === "function"){
+    p.then(function(){ clearTimeout(connTimer); })
+     .catch(function(){
+       clearTimeout(connTimer);
+       setLoading(false);
+       setStatus("▶ Başlatmak için tıkla", "");
+       isPlaying = false;
+       setIcon(false);
+       setViz(false);
+       setPill(false);
+     });
   }
 }
 
 function togglePlay(){
   if(isPlaying){
     isPlaying = false;
+    playReq = false;
     clearTimeout(retryTimer);
+    clearTimeout(connTimer);
     au.pause();
     au.removeAttribute("src");
     au.load();
@@ -346,13 +367,17 @@ function togglePlay(){
     setLoading(false);
     return;
   }
-  isPlaying = true;
-  if(baseUrl){
-    startStream();
-  } else {
+
+  if(!baseUrl){
+    playReq = true;
     setLoading(true);
     setStatus("Sunucu aranıyor...", "");
+    return;
   }
+
+  // baseUrl hazir → dogrudan kullanici hareketiyle cal (mobilde calisir!)
+  isPlaying = true;
+  startStream();
 }
 
 au.addEventListener("playing", function(){
@@ -417,8 +442,15 @@ function probe(){
       if(j.listeners != null)
         listBadge.textContent = j.listeners + " dinleyici";
       if(!sse) sseConnect();
-      if(isPlaying) startStream();
-      else { setLoading(false); setStatus("▶ Başlatmak için tıkla", ""); }
+      if(playReq){
+        playReq = false;
+        setLoading(false);
+        ppBtn.classList.add("ready");
+        setStatus("▶ Hazır, dokun", "warn");
+      } else {
+        setLoading(false);
+        setStatus("▶ Başlatmak için tıkla", "");
+      }
     })
     .catch(function(){ clearTimeout(t); next(); });
   }
