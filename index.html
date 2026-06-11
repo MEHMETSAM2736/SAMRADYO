@@ -95,7 +95,6 @@ background:#ff6b6b;cursor:pointer;border:2px solid #fff
 <div class="footer">sam.py &middot; Okul Radyosu</div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
 <script>
 var dot = document.getElementById('dot');
 var statusText = document.getElementById('statusText');
@@ -257,48 +256,14 @@ if (params.get('server')) {
     startApp('http://localhost:5000');
 } else {
     statusText.textContent = 'Radyo araniyor...';
-    var mqttDone = false;
-    try {
-        var cid = 'samradio_web_' + Math.random().toString(36).slice(2, 8);
-        var mqttClient = new Paho.MQTT.Client('broker.hivemq.com', Number(8884), '/mqtt', cid);
-        mqttClient.onMessageArrived = function(msg) {
-            if (mqttDone) return;
-            mqttDone = true;
-            mqttClient.disconnect();
-            startApp(msg.payloadString);
-        };
-        mqttClient.connect({
-            useSSL: true,
-            timeout: 5,
-            onSuccess: function() {
-                mqttClient.subscribe('samradio/url');
-            },
-            onFailure: function() {
-                if (!mqttDone) {
-                    mqttDone = true;
-                    fallbackDiscover();
-                }
-            }
-        });
-    } catch(e) {
-        if (!mqttDone) { mqttDone = true; fallbackDiscover(); }
-    }
-    setTimeout(function() {
-        if (!mqttDone) {
-            mqttDone = true;
-            if (mqttClient && mqttClient.isConnected()) mqttClient.disconnect();
-            fallbackDiscover();
-        }
-    }, 7000);
-}
-
-function fallbackDiscover() {
-    fetch('url.txt').then(function(r) {
-        if (!r.ok) throw new Error('no url.txt');
-        return r.text();
-    }).then(function(t) {
-        var url = t.trim();
-        if (url) startApp(url);
+    fetch('https://api.github.com/repos/mehmetsam2736/SAMRADYO/contents/url.txt', {
+        headers: {'Accept': 'application/vnd.github.v3+json'}
+    }).then(function(r) {
+        if (!r.ok) throw new Error('no file');
+        return r.json();
+    }).then(function(d) {
+        var url = atob(d.content.replace(/\s/g, ''));
+        if (url) startApp(url.trim());
         else throw new Error('empty');
     })["catch"](function() {
         dot.className = 'dot off';
