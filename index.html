@@ -67,8 +67,8 @@ background:#ff6b6b;cursor:pointer;border:2px solid #fff
 </div>
 
 <div class="status-line">
-<span class="dot" id="dot"></span>
-<span id="statusText">Baglaniyor...</span>
+<span class="dot off" id="dot"></span>
+<span id="statusText">Baglanti bekleniyor</span>
 </div>
 
 <div class="song-area">
@@ -242,12 +242,17 @@ function handleStatus(d) {
 }
 
 function fetchStatus() {
-    jsonp(base + '/status').then(handleStatus)["catch"](function(){if(connected)setOnline(false)});
+    jsonp(base + '/status').then(handleStatus)["catch"](function(){
+        if (connected) { setOnline(false); return; }
+        dot.className = 'dot off';
+        statusText.textContent = 'Sunucuya ulasilamiyor';
+        songName.textContent = 'sam.py kapali veya URL hatali';
+    });
 }
 
 if (!isLocal && window.location.protocol !== 'file:' && SERVER_URL.indexOf('YOUR_NGROK') > -1) {
     songName.textContent = 'Kurulum Gerekli';
-    waitingArea.querySelector('div:last-child').textContent = 'SERVER_URL degiskenini guncelleyin';
+    waitingArea.querySelector('div:last-child').textContent = 'index.html icindeki SERVER_URL degiskenini guncelleyin';
 } else {
     fetchStatus();
     setInterval(fetchStatus, 3000);
