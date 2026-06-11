@@ -839,8 +839,19 @@
         // =============================================
         //  SARKI BILGISI GUNCELLEME
         // =============================================
+        let currentSongTitle = '';
+
         function updateSongInfo(data) {
             const title = data.song.replace('.mp3', '');
+            
+            // Eger sarki degistiyse ve o an play modundaysak, baglantiyi yenile (aninda yeni sarkiya gecis)
+            if (currentSongTitle && currentSongTitle !== title && isPlaying && data.is_playing) {
+                console.log("Sarki degisimi algilandi, yayin yenileniyor...");
+                stopStream();
+                setTimeout(() => { playStream(); }, 100);
+            }
+            currentSongTitle = title;
+
             songTitle.textContent = title;
             songTitle.classList.toggle('waiting', !data.is_playing);
 
