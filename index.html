@@ -97,6 +97,8 @@ background:#ff6b6b;cursor:pointer;border:2px solid #fff
 
 <script>
 var SERVER_URL = "https://yo-yo-backing-paralyze.ngrok-free.dev";
+var params = new URLSearchParams(window.location.search);
+if (params.get('server')) SERVER_URL = params.get('server');
 
 function jsonp(url) {
     return new Promise(function(resolve, reject) {
