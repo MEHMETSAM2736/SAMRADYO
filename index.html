@@ -92,6 +92,11 @@ background:#ff6b6b;cursor:pointer;border:2px solid #fff
 </div>
 </div>
 
+<div id="interstitialHelp" style="display:none;margin-top:15px;font-size:13px;color:#888">
+<span style="color:#f59">Ngrok izni gerekebilir.</span>
+<span id="interstitialLink" onclick="openNgrok(event)" style="color:#6cf;text-decoration:underline;cursor:pointer">[Baglantiyi ac]</span>
+</div>
+
 <div class="footer">sam.py &middot; Okul Radyosu</div>
 </div>
 
@@ -105,6 +110,8 @@ var volumeWrap = document.getElementById('volumeWrap');
 var volumeSlider = document.getElementById('volumeSlider');
 var volLabel = document.getElementById('volLabel');
 var waitingArea = document.getElementById('waitingArea');
+var interstitialHelp = document.getElementById('interstitialHelp');
+var interstitialLink = document.getElementById('interstitialLink');
 
 var player = document.createElement('audio');
 player.preload = 'auto';
@@ -133,6 +140,7 @@ function jsonp(url) {
 function startApp(url) {
     BASE_URL = url;
     statusText.textContent = 'Baglanti bekleniyor';
+    interstitialHelp.style.display = 'none';
     fetchStatus();
     setInterval(fetchStatus, 3000);
 }
@@ -181,6 +189,11 @@ function connect() {
     setSongUI(lastStatus.song_name);
 }
 
+function openNgrok(event) {
+    if (event) event.preventDefault();
+    window.open(BASE_URL, '_blank');
+}
+
 connectBtn.addEventListener('click', connect);
 
 volumeSlider.addEventListener('input', function() {
@@ -208,6 +221,7 @@ function handleStatus(d) {
         return;
     }
     lastStatus = d;
+    interstitialHelp.style.display = 'none';
     if (connected) {
         if (d.is_playing && d.song_name) {
             setOnline(true);
@@ -246,6 +260,7 @@ function fetchStatus() {
         dot.className = 'dot off';
         statusText.textContent = 'Sunucuya ulasilamiyor';
         songName.textContent = 'sam.py kapali veya URL hatali';
+        interstitialHelp.style.display = 'block';
     });
 }
 
