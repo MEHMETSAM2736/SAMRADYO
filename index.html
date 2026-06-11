@@ -31,10 +31,9 @@ background:linear-gradient(135deg,#ff6b6b,#ffa94d);
 .live-badge{
 display:none;background:#e03131;color:#fff;
 font-size:10px;font-weight:700;padding:4px 14px;border-radius:20px;
-letter-spacing:1.5px;animation:livePulse 2s infinite;margin-top:10px
+letter-spacing:1.5px;margin-top:10px
 }
 .live-badge.on{display:inline-block}
-@keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.5}}
 .connect-btn{
 background:linear-gradient(135deg,#ff6b6b,#ee5a24);
 border:none;color:#fff;font-size:18px;font-weight:700;
@@ -97,7 +96,7 @@ background:#ff6b6b;cursor:pointer;border:2px solid #fff
 </div>
 
 <script>
-var SERVER_URL = "";
+var SERVER_URL = "https://yo-yo-backing-paralyze.ngrok-free.dev";
 
 function jsonp(url) {
     return new Promise(function(resolve, reject) {
@@ -124,15 +123,16 @@ var waitingArea = document.getElementById('waitingArea');
 
 var player = document.createElement('audio');
 player.preload = 'auto';
-player.style.cssText = 'position:absolute;width:0;height:0;opacity:0';
+player.style.display = 'none';
 document.body.appendChild(player);
 
 var currentSong = null;
 var connected = false;
 var lastStatus = null;
+var switching = false;
 
 var isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-if (!SERVER_URL) { SERVER_URL = isLocal ? 'http://localhost:5000' : ''; }
+if (isLocal) SERVER_URL = 'http://localhost:5000';
 var base = '';
 if (window.location.protocol === 'file:') { base = SERVER_URL || 'http://localhost:5000'; }
 else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') { base = ''; }
@@ -156,6 +156,16 @@ function seekLive() {
     player.currentTime = elapsed;
 }
 
+function startAudio(src) {
+    player.src = src;
+    player.load();
+    player.addEventListener('canplay', function onReady() {
+        player.removeEventListener('canplay', onReady);
+        seekLive();
+        player.play()["catch"](function(){});
+    });
+}
+
 function connect() {
     if (!lastStatus || !lastStatus.is_playing) {
         waitingArea.querySelector('div:last-child').textContent = 'Henuz sarki secilmedi!';
@@ -167,13 +177,7 @@ function connect() {
     waitingArea.style.display = 'none';
     currentSong = lastStatus.song_name;
     player.volume = volumeSlider.value / 100;
-    player.src = base + '/stream?fresh=1&_=' + Date.now();
-    player.load();
-    player.addEventListener('loadedmetadata', function onMeta() {
-        player.removeEventListener('loadedmetadata', onMeta);
-        seekLive();
-        player.play()["catch"](function(){});
-    });
+    startAudio(base + '/stream?v=' + Date.now());
     setOnline(true);
     setSongUI(lastStatus.song_name);
 }
@@ -186,21 +190,17 @@ volumeSlider.addEventListener('input', function() {
     volLabel.textContent = v;
 });
 
-function changeSong(name) {
+function switchSong(name) {
+    if (switching) return;
+    switching = true;
     currentSong = name;
-    var oldPlayer = player;
-    player = document.createElement('audio');
-    player.preload = 'auto';
-    player.style.cssText = 'position:absolute;width:0;height:0;opacity:0';
-    player.volume = oldPlayer.volume;
-    oldPlayer.parentNode.replaceChild(player, oldPlayer);
-    player.src = base + '/stream?fresh=1&_=' + Date.now();
+    player.pause();
+    player.removeAttribute('src');
     player.load();
-    player.addEventListener('loadedmetadata', function onMeta() {
-        player.removeEventListener('loadedmetadata', onMeta);
-        seekLive();
-        player.play()["catch"](function(){});
-    });
+    setTimeout(function() {
+        startAudio(base + '/stream?v=' + Date.now());
+        switching = false;
+    }, 150);
 }
 
 function handleStatus(d) {
@@ -214,7 +214,7 @@ function handleStatus(d) {
             setOnline(true);
             setSongUI(d.song_name);
             if (currentSong !== d.song_name) {
-                changeSong(d.song_name);
+                switchSong(d.song_name);
             }
         } else {
             setOnline(false);
@@ -245,10 +245,9 @@ function fetchStatus() {
     jsonp(base + '/status').then(handleStatus)["catch"](function(){if(connected)setOnline(false)});
 }
 
-if (!isLocal && window.location.protocol !== 'file:' && !SERVER_URL) {
+if (!isLocal && window.location.protocol !== 'file:' && SERVER_URL.indexOf('YOUR_NGROK') > -1) {
     songName.textContent = 'Kurulum Gerekli';
     waitingArea.querySelector('div:last-child').textContent = 'SERVER_URL degiskenini guncelleyin';
-    setOnline(false);
 } else {
     fetchStatus();
     setInterval(fetchStatus, 3000);
