@@ -1,463 +1,258 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Okul Radyosu</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-
-html,body{
-  height:100%;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  background:#000;
-  color:#fff;
-  -webkit-tap-highlight-color:transparent;
-  user-select:none;
+body{
+font-family:'Segoe UI',Arial,sans-serif;
+background:linear-gradient(135deg,#0c0c1d 0%,#1a1a3e 50%,#0c0c1d 100%);
+color:#fff;min-height:100vh;
+display:flex;align-items:center;justify-content:center;padding:20px
 }
-
-body::before{
-  content:"";
-  position:fixed;inset:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,100,255,.18) 0%,transparent 70%),
-    radial-gradient(ellipse 50% 40% at 80% 80%,rgba(0,50,180,.10) 0%,transparent 60%),
-    #000;
-  z-index:0;
+.container{width:100%;max-width:480px;text-align:center}
+.header{margin-bottom:40px}
+.header h1{
+font-size:34px;font-weight:800;
+background:linear-gradient(135deg,#ff6b6b,#ffa94d);
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px
 }
-
-.page{
-  position:relative;z-index:1;
-  min-height:100vh;
-  display:flex;flex-direction:column;
+.header p{color:#666;font-size:12px;margin-top:6px;letter-spacing:3px;text-transform:uppercase}
+.status-line{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:30px;font-size:13px;color:#888}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.dot.off{background:#555}
+.dot.on{background:#51cf66;box-shadow:0 0 8px rgba(81,207,102,0.5);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.song-area{margin-bottom:25px;min-height:80px}
+.label{color:#555;font-size:11px;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.song-name{font-size:30px;font-weight:700;word-break:break-word;line-height:1.3}
+.live-badge{
+display:none;background:#e03131;color:#fff;
+font-size:10px;font-weight:700;padding:4px 14px;border-radius:20px;
+letter-spacing:1.5px;animation:livePulse 2s infinite;margin-top:10px
 }
-
-/* -- header -- */
-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:18px 28px;
-  border-bottom:1px solid rgba(255,255,255,.06);
+.live-badge.on{display:inline-block}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.connect-btn{
+background:linear-gradient(135deg,#ff6b6b,#ee5a24);
+border:none;color:#fff;font-size:18px;font-weight:700;
+padding:14px 48px;border-radius:50px;cursor:pointer;
+transition:all .3s;letter-spacing:2px;margin:20px 0
 }
-.logo{
-  font-size:17px;font-weight:800;
-  display:flex;align-items:center;gap:8px;
+.connect-btn:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(255,107,107,0.3)}
+.connect-btn:active{transform:scale(0.97)}
+.volume-wrap{display:none;align-items:center;justify-content:center;gap:14px;margin:20px 0}
+.volume-wrap.on{display:flex}
+.volume-wrap .icon{font-size:20px;color:#888;width:24px;text-align:center}
+.volume-wrap input[type=range]{
+width:200px;height:4px;-webkit-appearance:none;
+background:rgba(255,255,255,0.15);border-radius:4px;outline:none
 }
-.logo-dot{
-  width:28px;height:28px;border-radius:8px;
-  background:linear-gradient(135deg,#007aff,#0051d4);
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;
+.volume-wrap input[type=range]::-webkit-slider-thumb{
+-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+background:#ff6b6b;cursor:pointer;border:2px solid #fff
 }
-.logo-name span{color:#007aff}
-
-.pill{
-  display:flex;align-items:center;gap:6px;
-  padding:5px 13px;border-radius:20px;
-  background:rgba(0,122,255,.12);
-  border:1px solid rgba(0,122,255,.2);
-  font-size:10px;font-weight:700;
-  letter-spacing:.8px;color:#4da6ff;
-  transition:all .4s;
-}
-.pill.off{
-  background:rgba(255,255,255,.04);
-  border-color:rgba(255,255,255,.08);
-  color:#444;
-}
-.pill-dot{
-  width:7px;height:7px;border-radius:50%;
-  background:#007aff;
-  animation:blink 1.8s ease-in-out infinite;
-}
-.pill.off .pill-dot{background:#333;animation:none}
-@keyframes blink{
-  0%{box-shadow:0 0 0 0 rgba(0,122,255,.9)}
-  60%{box-shadow:0 0 0 7px rgba(0,122,255,0)}
-  100%{box-shadow:0 0 0 0 rgba(0,122,255,0)}
-}
-
-/* -- main -- */
-main{
-  flex:1;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:40px 24px 32px;
-  gap:32px;
-}
-
-/* -- visualizer -- */
-.viz{display:flex;align-items:flex-end;gap:4px;height:52px}
-.vbar{
-  width:6px;border-radius:3px 3px 0 0;
-  background:linear-gradient(0deg,#0051d4,#4da6ff);
-  animation:va 1.2s ease-in-out infinite;
-  transform-origin:bottom;
-}
-.vbar:nth-child(1){height:14px;animation-delay:.10s}
-.vbar:nth-child(2){height:36px;animation-delay:.25s}
-.vbar:nth-child(3){height:22px;animation-delay:.05s}
-.vbar:nth-child(4){height:52px;animation-delay:.18s}
-.vbar:nth-child(5){height:28px;animation-delay:.32s}
-.vbar:nth-child(6){height:18px;animation-delay:.14s}
-.vbar:nth-child(7){height:42px;animation-delay:.28s}
-@keyframes va{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
-.viz.paused .vbar{animation-play-state:paused;opacity:.18}
-
-/* -- info -- */
-.info{text-align:center;max-width:600px;width:100%}
-.status-txt{
-  font-size:10px;font-weight:700;letter-spacing:2px;
-  text-transform:uppercase;color:#333;
-  margin-bottom:10px;min-height:14px;
-  transition:color .4s;
-}
-.status-txt.on{color:#4da6ff}
-.status-txt.warn{color:#ff9f0a}
-
-.song{
-  font-size:clamp(26px,6vw,56px);
-  font-weight:900;line-height:1.15;
-  letter-spacing:-.5px;
-  transition:opacity .3s;
-}
-.song.fade{opacity:0}
-.meta{margin-top:10px;font-size:13px;color:#2a2a2e;font-weight:500}
-
-/* -- controls -- */
-.controls{
-  display:flex;flex-direction:column;align-items:center;
-  gap:16px;width:100%;max-width:420px;
-}
-
-.playpause{
-  width:72px;height:72px;border-radius:50%;
-  background:linear-gradient(135deg,#007aff,#0040c8);
-  border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 8px 32px rgba(0,122,255,.35);
-  transition:transform .15s,box-shadow .15s,opacity .15s;
-  flex-shrink:0;
-}
-.playpause:active{transform:scale(.93)}
-.playpause.loading{opacity:.6;pointer-events:none}
-
-.pp-icon{width:28px;height:28px;fill:#fff}
-
-/* ses */
-.vol-row{display:flex;align-items:center;gap:10px;width:100%}
-.vol-icon{width:18px;height:18px;flex-shrink:0;fill:rgba(255,255,255,.25)}
-input[type=range]{
-  -webkit-appearance:none;appearance:none;
-  width:100%;height:4px;
-  border-radius:2px;background:rgba(255,255,255,.12);
-  outline:none;cursor:pointer;
-}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:18px;height:18px;
-  border-radius:50%;background:#007aff;
-  box-shadow:0 2px 8px rgba(0,122,255,.5);
-}
-input[type=range]::-moz-range-thumb{
-  width:18px;height:18px;border-radius:50%;
-  background:#007aff;border:none;
-}
-
-audio{display:none}
-
-/* -- footer -- */
-footer{
-  padding:14px 20px;
-  display:flex;justify-content:center;
-  border-top:1px solid rgba(255,255,255,.04);
-}
-.badge{
-  background:rgba(0,122,255,.08);
-  border:1px solid rgba(0,122,255,.15);
-  color:#2a6aad;
-  padding:4px 12px;border-radius:20px;
-  font-size:12px;font-weight:600;
-}
-
-#dbg{
-  position:fixed;bottom:4px;right:6px;
-  font-size:9px;color:rgba(255,255,255,.12);
-  font-family:monospace;pointer-events:none;
-  text-align:right;line-height:1.6;
-}
+.waiting-area{color:#666;font-size:16px;margin:30px 0}
+.waiting-area .icon{font-size:44px;margin-bottom:12px}
+.footer{color:#333;font-size:11px;margin-top:30px;letter-spacing:1px}
+@media(max-width:480px){.song-name{font-size:24px}.volume-wrap input[type=range]{width:160px}}
 </style>
 </head>
 <body>
-<div class="page">
-
-  <header>
-    <div class="logo">
-      <div class="logo-dot">📻</div>
-      <div class="logo-name">MEHMET <span>SAM</span></div>
-    </div>
-    <div class="pill off" id="pill">
-      <div class="pill-dot"></div>
-      <span id="pillTxt">BAĞLANIYOR</span>
-    </div>
-  </header>
-
-  <main>
-    <div class="viz paused" id="viz">
-      <div class="vbar"></div><div class="vbar"></div><div class="vbar"></div>
-      <div class="vbar"></div><div class="vbar"></div><div class="vbar"></div>
-      <div class="vbar"></div>
-    </div>
-
-    <div class="info">
-      <div class="status-txt" id="stTxt">Sunucu aranıyor…</div>
-      <h1 class="song" id="songEl">Okul Radyosu</h1>
-      <p class="meta">MEHMET SAM RADYO</p>
-    </div>
-
-    <div class="controls">
-      <button class="playpause loading" id="ppBtn"
-              onclick="togglePlay()" aria-label="Oynat/Duraklat">
-        <svg class="pp-icon" viewBox="0 0 24 24">
-          <path id="ppPath" d="M8,5 L8,19 L19,12 Z"/>
-        </svg>
-      </button>
-
-      <div class="vol-row">
-        <svg class="vol-icon" viewBox="0 0 24 24">
-          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-        </svg>
-        <input type="range" id="volRange" min="0" max="100" value="85"
-               oninput="au.volume=this.value/100" aria-label="Ses">
-        <svg class="vol-icon" viewBox="0 0 24 24">
-          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-        </svg>
-      </div>
-    </div>
-
-    <audio id="au" preload="none"></audio>
-  </main>
-
-  <footer>
-    <span class="badge" id="listBadge">— dinleyici</span>
-  </footer>
-
+<div class="container">
+<div class="header">
+<h1>OKUL RADYOSU</h1>
+<p>Canli Yayin</p>
 </div>
-<div id="dbg"></div>
+
+<div class="status-line">
+<span class="dot" id="dot"></span>
+<span id="statusText">Baglaniyor...</span>
+</div>
+
+<div class="song-area">
+<div class="label">Su Anda Calan</div>
+<div class="song-name" id="songName">---</div>
+<div class="live-badge" id="liveBadge">CANLI</div>
+</div>
+
+<div id="controlArea">
+<div id="waitingArea" class="waiting-area">
+<div class="icon">&#x1F4E1;</div>
+<div>Yayin bekleniyor</div>
+</div>
+
+<button class="connect-btn" id="connectBtn" style="display:none">BAGLAN</button>
+
+<div class="volume-wrap" id="volumeWrap">
+<span class="icon">&#x1F509;</span>
+<input type="range" id="volumeSlider" min="0" max="100" value="80">
+<span class="icon" id="volLabel">80</span>
+</div>
+</div>
+
+<div class="footer">sam.py &middot; Okul Radyosu</div>
+</div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   GITHUB PAGES İÇİN:
-   sec.py çalışınca sana verdiği ngrok linkini aşağıya yapıştır
-   Örnek: var NGROK_HINT = "https://a1b2c3d4.ngrok-free.app";
-   ═══════════════════════════════════════════════════════════════ */
-var NGROK_HINT = "";   
-var LAN_IPS    = [];   
-var PORT       = 8000;
+var SERVER_URL = "";
 
-var au       = document.getElementById("au");
-var songEl   = document.getElementById("songEl");
-var stTxt    = document.getElementById("stTxt");
-var listBadge= document.getElementById("listBadge");
-var vizEl    = document.getElementById("viz");
-var ppBtn    = document.getElementById("ppBtn");
-var ppPath   = document.getElementById("ppPath");
-var pillEl   = document.getElementById("pill");
-var pillTxt  = document.getElementById("pillTxt");
-var dbgEl    = document.getElementById("dbg");
-
-var PLAY_D  = "M8,5 L8,19 L19,12 Z";
-var PAUSE_D = "M6,4 L10,4 L10,20 L6,20 Z M14,4 L18,4 L18,20 L14,20 Z";
-
-var baseUrl   = "";
-var isPlaying = false;
-var songId    = -1;
-var sse       = null;
-var retryTimer = null;
-
-au.volume = 0.85;
-
-function dbg(m){ dbgEl.textContent = m; }
-
-function setStatus(txt, cls){
-  stTxt.textContent = txt;
-  stTxt.className   = "status-txt " + (cls||"");
-}
-
-function setPill(live){
-  pillEl.className = "pill" + (live ? "" : " off");
-  pillTxt.textContent = live ? "CANLI" : "KAPALI";
-}
-
-function setViz(on){
-  vizEl.classList.toggle("paused", !on);
-}
-
-function setIcon(play){
-  ppPath.setAttribute("d", play ? PAUSE_D : PLAY_D);
-}
-
-function setLoading(v){
-  ppBtn.className = "playpause" + (v ? " loading" : "");
-}
-
-function setSong(name, id){
-  if(!name || name==="-") return;
-  if(id !== undefined && id === songId) return;
-  if(id !== undefined) songId = id;
-  songEl.classList.add("fade");
-  setTimeout(function(){
-    songEl.textContent = name;
-    songEl.classList.remove("fade");
-  }, 280);
-}
-
-function startStream(){
-  if(!baseUrl || !isPlaying) return;
-  clearTimeout(retryTimer);
-  setLoading(true);
-  setStatus("Bağlanıyor...", "warn");
-
-  au.src = baseUrl + "/stream?t=" + Date.now();
-  // iOS'ta au.load() KULLANMA - gesture zincirini kirar
-
-  var p = au.play();
-  if(p instanceof Promise){
-    p.catch(function(){
-      setLoading(false);
-      setStatus("▶ Başlatmak için tıkla", "");
-      isPlaying = false;
-      setIcon(false);
-      setViz(false);
-      setPill(false);
+function jsonp(url) {
+    return new Promise(function(resolve, reject) {
+        var id = '_cb' + (Math.random()*99999|0);
+        var s = document.createElement('script');
+        var t = setTimeout(function(){cleanup();reject(new Error('timeout'))},8000);
+        window[id]=function(d){cleanup();resolve(d)};
+        function cleanup(){clearTimeout(t);delete window[id];if(s.parentNode)s.parentNode.removeChild(s)}
+        s.src = url + (url.indexOf('?')>-1?'&':'?') + 'callback=' + id;
+        s.onerror = function(){cleanup();reject(new Error('net'))};
+        document.body.appendChild(s);
     });
-  }
 }
 
-function togglePlay(){
-  if(isPlaying){
-    isPlaying = false;
-    clearTimeout(retryTimer);
-    au.pause();
-    au.removeAttribute("src");
-    au.load();
-    setIcon(false);
-    setViz(false);
-    setPill(false);
-    setStatus("Duraklatıldı","");
-    setLoading(false);
-    return;
-  }
-  isPlaying = true;
-  if(baseUrl){
-    startStream();
-  } else {
-    setLoading(true);
-    setStatus("Sunucu aranıyor...", "");
-  }
+var dot = document.getElementById('dot');
+var statusText = document.getElementById('statusText');
+var songName = document.getElementById('songName');
+var liveBadge = document.getElementById('liveBadge');
+var connectBtn = document.getElementById('connectBtn');
+var volumeWrap = document.getElementById('volumeWrap');
+var volumeSlider = document.getElementById('volumeSlider');
+var volLabel = document.getElementById('volLabel');
+var waitingArea = document.getElementById('waitingArea');
+
+var player = document.createElement('audio');
+player.preload = 'auto';
+player.style.cssText = 'position:absolute;width:0;height:0;opacity:0';
+document.body.appendChild(player);
+
+var currentSong = null;
+var connected = false;
+var lastStatus = null;
+
+var isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+if (!SERVER_URL) { SERVER_URL = isLocal ? 'http://localhost:5000' : ''; }
+var base = '';
+if (window.location.protocol === 'file:') { base = SERVER_URL || 'http://localhost:5000'; }
+else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') { base = ''; }
+else { base = SERVER_URL; }
+
+function setOnline(on) {
+    if (!connected) { dot.className = 'dot off'; statusText.textContent = 'Bagli degil'; return; }
+    dot.className = 'dot' + (on ? ' on' : ' off');
+    statusText.textContent = on ? 'Yayinda' : 'Baglanti kesik';
 }
 
-au.addEventListener("playing", function(){
-  setLoading(false);
-  setIcon(true);
-  setViz(true);
-  setPill(true);
-  setStatus("CANLI", "on");
-  dbg("yayın başladı");
-  if(!sse) sseConnect();
-});
-
-au.addEventListener("pause", function(){
-  if(isPlaying) retry();
-});
-
-au.addEventListener("ended", function(){
-  if(isPlaying) retry();
-});
-
-au.addEventListener("error", function(){
-  setLoading(false);
-  setIcon(false);
-  setViz(false);
-  setPill(false);
-  if(isPlaying){
-    setStatus("Bağlantı hatası, yenileniyor...", "warn");
-    dbg("hata: " + (au.error ? au.error.code : "?"));
-    retry();
-  }
-});
-
-function retry(){
-  clearTimeout(retryTimer);
-  retryTimer = setTimeout(function(){
-    if(isPlaying && baseUrl) startStream();
-  }, 3000);
+function setSongUI(name) {
+    songName.textContent = name || '---';
+    liveBadge.className = 'live-badge' + (name && connected ? ' on' : '');
 }
 
-function probe(){
-  var list = [];
-  if(NGROK_HINT) list.push(NGROK_HINT.replace(/\/$/,""));
-  LAN_IPS.forEach(function(u){ list.push(u.replace(/\/$/,"")); });
-  list.push("http://localhost:" + PORT);
-
-  var i = 0;
-  function next(){
-    if(i >= list.length){ setTimeout(probe, 5000); return; }
-    var u = list[i++];
-    var c = new AbortController();
-    var t = setTimeout(function(){ c.abort(); }, 4000);
-    fetch(u + "/url?t=" + Date.now(), {
-      headers: {"ngrok-skip-browser-warning":"true"},
-      signal: c.signal
-    })
-    .then(function(r){ clearTimeout(t); if(!r.ok) throw Error(); return r.json(); })
-    .then(function(j){
-      baseUrl = u;
-      dbg("sunucu: " + baseUrl);
-      if(j.now_playing && j.now_playing !== "-")
-        setSong(j.now_playing, j.song_id);
-      if(j.listeners != null)
-        listBadge.textContent = j.listeners + " dinleyici";
-      if(!sse) sseConnect();
-      if(isPlaying) startStream();
-      else { setLoading(false); setStatus("▶ Başlatmak için tıkla", ""); }
-    })
-    .catch(function(){ clearTimeout(t); next(); });
-  }
-  next();
+function seekLive() {
+    if (!lastStatus || !lastStatus.is_playing || !lastStatus.start_time) return;
+    var elapsed = lastStatus.current_position + (Date.now()/1000 - lastStatus.server_time);
+    if (elapsed < 0) elapsed = 0;
+    player.currentTime = elapsed;
 }
 
-function sseConnect(){
-  if(!baseUrl) return;
-  if(sse){ sse.close(); sse = null; }
-  try{
-    var es = new EventSource(baseUrl + "/events");
-    es.addEventListener("song_change", function(e){
-      try{
-        var d = JSON.parse(e.data);
-        setSong(d.song, d.song_id);
-      }catch(ex){}
+function connect() {
+    if (!lastStatus || !lastStatus.is_playing) {
+        waitingArea.querySelector('div:last-child').textContent = 'Henuz sarki secilmedi!';
+        return;
+    }
+    connected = true;
+    connectBtn.style.display = 'none';
+    volumeWrap.className = 'volume-wrap on';
+    waitingArea.style.display = 'none';
+    currentSong = lastStatus.song_name;
+    player.volume = volumeSlider.value / 100;
+    player.src = base + '/stream?fresh=1&_=' + Date.now();
+    player.load();
+    player.addEventListener('loadedmetadata', function onMeta() {
+        player.removeEventListener('loadedmetadata', onMeta);
+        seekLive();
+        player.play()["catch"](function(){});
     });
-    es.onerror = function(){
-      es.close(); sse = null;
-      setTimeout(sseConnect, 5000);
-    };
-    sse = es;
-  }catch(ex){ dbg("SSE: " + ex.message); }
+    setOnline(true);
+    setSongUI(lastStatus.song_name);
 }
 
-setInterval(function(){
-  if(!baseUrl) return;
-  fetch(baseUrl + "/info.json?t=" + Date.now(), {
-    headers:{"ngrok-skip-browser-warning":"true"}
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(j){
-    if(j.d != null) listBadge.textContent = j.d + " dinleyici";
-    if(!sse && j.s && j.s!=="-") setSong(j.s, j.song_id);
-  })
-  .catch(function(){});
-}, 8000);
+connectBtn.addEventListener('click', connect);
 
-probe();
+volumeSlider.addEventListener('input', function() {
+    var v = volumeSlider.value;
+    player.volume = v / 100;
+    volLabel.textContent = v;
+});
+
+function changeSong(name) {
+    currentSong = name;
+    var oldPlayer = player;
+    player = document.createElement('audio');
+    player.preload = 'auto';
+    player.style.cssText = 'position:absolute;width:0;height:0;opacity:0';
+    player.volume = oldPlayer.volume;
+    oldPlayer.parentNode.replaceChild(player, oldPlayer);
+    player.src = base + '/stream?fresh=1&_=' + Date.now();
+    player.load();
+    player.addEventListener('loadedmetadata', function onMeta() {
+        player.removeEventListener('loadedmetadata', onMeta);
+        seekLive();
+        player.play()["catch"](function(){});
+    });
+}
+
+function handleStatus(d) {
+    if (!d || d.error) {
+        if (connected) setOnline(false);
+        return;
+    }
+    lastStatus = d;
+    if (connected) {
+        if (d.is_playing && d.song_name) {
+            setOnline(true);
+            setSongUI(d.song_name);
+            if (currentSong !== d.song_name) {
+                changeSong(d.song_name);
+            }
+        } else {
+            setOnline(false);
+            setSongUI(null);
+            currentSong = null;
+            player.pause();
+            player.removeAttribute('src');
+            player.load();
+        }
+    } else {
+        if (d.is_playing && d.song_name) {
+            songName.textContent = d.song_name;
+            waitingArea.style.display = 'none';
+            connectBtn.style.display = 'inline-block';
+            dot.className = 'dot on';
+            statusText.textContent = 'Yayin hazir';
+        } else {
+            waitingArea.style.display = 'block';
+            connectBtn.style.display = 'none';
+            songName.textContent = '---';
+            dot.className = 'dot off';
+            statusText.textContent = 'Yayin bekleniyor';
+        }
+    }
+}
+
+function fetchStatus() {
+    jsonp(base + '/status').then(handleStatus)["catch"](function(){if(connected)setOnline(false)});
+}
+
+if (!isLocal && window.location.protocol !== 'file:' && !SERVER_URL) {
+    songName.textContent = 'Kurulum Gerekli';
+    waitingArea.querySelector('div:last-child').textContent = 'SERVER_URL degiskenini guncelleyin';
+    setOnline(false);
+} else {
+    fetchStatus();
+    setInterval(fetchStatus, 3000);
+}
 </script>
 </body>
 </html>
