@@ -928,51 +928,69 @@
             }
             console.log("Sunucu adresi:", SERVER_URL);
             
-            // Ilk kontrol
             checkServer();
-
-            // Her 2 saniyede sarki bilgisini guncelle
             updateInterval = setInterval(updateNowPlaying, 2000);
-
-            // Her 10 saniyede sunucu kontrolu (baglanti yoksa)
             setInterval(() => {
                 if (!serverConnected) checkServer();
             }, 10000);
         }
 
-        // Sunucu adresini bul
+        function showNgrokBypass() {
+            if (document.getElementById('ngrok-bypass')) return;
+            const div = document.createElement('div');
+            div.id = 'ngrok-bypass';
+            div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;text-align:center;padding:20px;';
+            div.innerHTML = `
+                <h2>Guvenlik Onayi Gerekiyor</h2>
+                <p style="margin-bottom:20px;color:#aaa;">Ucretsiz Ngrok servisi kullanildigi icin radyoyu dinlemeden once bir defaligina onay vermeniz gerekiyor.</p>
+                <button onclick="window.open('${SERVER_URL}', '_blank')" style="background:#e91e63;color:white;border:none;padding:15px 30px;border-radius:30px;font-size:18px;cursor:pointer;margin-bottom:15px;box-shadow:0 0 15px rgba(233,30,99,0.5);">1. Buraya Tiklayip Acilan Sayfada 'Visit Site' Butonuna Basin</button>
+                <button onclick="document.getElementById('ngrok-bypass').remove(); setTimeout(()=>playStream(), 500);" style="background:#1db954;color:white;border:none;padding:15px 30px;border-radius:30px;font-size:18px;cursor:pointer;box-shadow:0 0 15px rgba(29,185,84,0.5);">2. Onayi Verdikten Sonra Buraya Tiklayin</button>
+            `;
+            document.body.appendChild(div);
+        }
+
+        audio.addEventListener('error', () => {
+            isPlaying = false;
+            connecting.classList.remove('show');
+            updateUI();
+            if (SERVER_URL && SERVER_URL.includes('ngrok')) {
+                showNgrokBypass();
+            } else {
+                statusMsg.textContent = 'Oynatma hatasi - tekrar deneyin';
+            }
+        });
+
         const params = new URLSearchParams(window.location.search);
         let serverParam = params.get('server') || '';
 
         if (serverParam) {
             startApp(serverParam);
         } else if (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            // Yerel testlerde dogrudan IPv4 sunucusuna baglan (IPv6 ::1 hatalarini onlemek icin)
             startApp('http://127.0.0.1:5000');
         } else {
-            // 1. Adim: Ayni dizindeki url.txt'yi oku (GitHub Pages uzerinde cok hizlidir)
-            fetch('url.txt?t=' + Date.now())
+            // Her zaman once GitHub API'den cek (Sayfa onbelleklenmesine karsi en guncel linki almak icin)
+            fetch('https://api.github.com/repos/mehmetsam2736/SAMRADYO/contents/url.txt?t=' + Date.now(), {
+                headers: {'Accept': 'application/vnd.github.v3+json'}
+            })
             .then(res => {
                 if (!res.ok) throw new Error();
-                return res.text();
+                return res.json();
             })
-            .then(url => {
-                url = url.trim();
-                if (url) startApp(url);
+            .then(data => {
+                let url = atob(data.content.replace(/\s/g, ''));
+                if (url) startApp(url.trim());
                 else throw new Error();
             })
             .catch(() => {
-                // 2. Adim: GitHub API fallback (url.txt yerel olarak yuklenmezse veya localhost disinda ise)
-                fetch('https://api.github.com/repos/mehmetsam2736/SAMRADYO/contents/url.txt?t=' + Date.now(), {
-                    headers: {'Accept': 'application/vnd.github.v3+json'}
-                })
+                // Eger API engellenirse (Rate limit) normal dosyadan oku
+                fetch('url.txt?t=' + Date.now())
                 .then(res => {
                     if (!res.ok) throw new Error();
-                    return res.json();
+                    return res.text();
                 })
-                .then(data => {
-                    let url = atob(data.content.replace(/\s/g, ''));
-                    if (url) startApp(url.trim());
+                .then(url => {
+                    url = url.trim();
+                    if (url) startApp(url);
                     else throw new Error();
                 })
                 .catch(() => {
