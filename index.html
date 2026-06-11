@@ -56,7 +56,6 @@ background:#ff6b6b;cursor:pointer;border:2px solid #fff
 .waiting-area{color:#666;font-size:16px;margin:30px 0}
 .waiting-area .icon{font-size:44px;margin-bottom:12px}
 .footer{color:#333;font-size:11px;margin-top:30px;letter-spacing:1px}
-.url-info{color:#555;font-size:11px;margin-top:10px;word-break:break-all}
 @media(max-width:480px){.song-name{font-size:24px}.volume-wrap input[type=range]{width:160px}}
 </style>
 </head>
@@ -94,9 +93,9 @@ background:#ff6b6b;cursor:pointer;border:2px solid #fff
 </div>
 
 <div class="footer">sam.py &middot; Okul Radyosu</div>
-<div class="url-info" id="urlInfo"></div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
 <script>
 var dot = document.getElementById('dot');
 var statusText = document.getElementById('statusText');
@@ -107,7 +106,6 @@ var volumeWrap = document.getElementById('volumeWrap');
 var volumeSlider = document.getElementById('volumeSlider');
 var volLabel = document.getElementById('volLabel');
 var waitingArea = document.getElementById('waitingArea');
-var urlInfo = document.getElementById('urlInfo');
 
 var player = document.createElement('audio');
 player.preload = 'auto';
@@ -118,7 +116,7 @@ var currentSong = null;
 var connected = false;
 var lastStatus = null;
 var switching = false;
-var BASE_URL = '';
+var BASE_URL = null;
 
 function jsonp(url) {
     return new Promise(function(resolve, reject) {
@@ -133,21 +131,11 @@ function jsonp(url) {
     });
 }
 
-function findBaseUrl() {
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('server')) return Promise.resolve(params.get('server'));
-
-    if (window.location.protocol === 'file:') return Promise.resolve('http://localhost:5000');
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return Promise.resolve('');
-
-    return fetch('url.txt').then(function(r) {
-        if (!r.ok) throw new Error('no url.txt');
-        return r.text();
-    }).then(function(t) {
-        return t.trim();
-    })["catch"](function() {
-        return null;
-    });
+function startApp(url) {
+    BASE_URL = url;
+    statusText.textContent = 'Baglanti bekleniyor';
+    fetchStatus();
+    setInterval(fetchStatus, 3000);
 }
 
 function setOnline(on) {
@@ -262,23 +250,62 @@ function fetchStatus() {
     });
 }
 
-findBaseUrl().then(function(url) {
-    if (url === null) {
-        statusText.textContent = 'URL bulunamadi';
-        songName.textContent = 'url.txt yok. Siteyi ?server=https://... ile acin';
-        urlInfo.textContent = 'Terminaldeki ngrok URL ile ?server= kullanin';
-        return;
+var params = new URLSearchParams(window.location.search);
+if (params.get('server')) {
+    startApp(params.get('server'));
+} else if (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    startApp('http://localhost:5000');
+} else {
+    statusText.textContent = 'Radyo araniyor...';
+    var mqttDone = false;
+    try {
+        var cid = 'samradio_web_' + Math.random().toString(36).slice(2, 8);
+        var mqttClient = new Paho.MQTT.Client('broker.hivemq.com', Number(8884), '/mqtt', cid);
+        mqttClient.onMessageArrived = function(msg) {
+            if (mqttDone) return;
+            mqttDone = true;
+            mqttClient.disconnect();
+            startApp(msg.payloadString);
+        };
+        mqttClient.connect({
+            useSSL: true,
+            timeout: 5,
+            onSuccess: function() {
+                mqttClient.subscribe('samradio/url');
+            },
+            onFailure: function() {
+                if (!mqttDone) {
+                    mqttDone = true;
+                    fallbackDiscover();
+                }
+            }
+        });
+    } catch(e) {
+        if (!mqttDone) { mqttDone = true; fallbackDiscover(); }
     }
-    if (url === '') {
-        // localhost: relative URLs work
-        BASE_URL = '';
-    } else {
-        BASE_URL = url;
-    }
-    urlInfo.textContent = 'Sunucu: ' + (BASE_URL || ('http://localhost:' + 5000));
-    fetchStatus();
-    setInterval(fetchStatus, 3000);
-});
+    setTimeout(function() {
+        if (!mqttDone) {
+            mqttDone = true;
+            if (mqttClient && mqttClient.isConnected()) mqttClient.disconnect();
+            fallbackDiscover();
+        }
+    }, 7000);
+}
+
+function fallbackDiscover() {
+    fetch('url.txt').then(function(r) {
+        if (!r.ok) throw new Error('no url.txt');
+        return r.text();
+    }).then(function(t) {
+        var url = t.trim();
+        if (url) startApp(url);
+        else throw new Error('empty');
+    })["catch"](function() {
+        dot.className = 'dot off';
+        statusText.textContent = 'Sunucu bulunamadi';
+        songName.textContent = 'sam.py calistirildigindan emin olun';
+    });
+}
 </script>
 </body>
 </html>
