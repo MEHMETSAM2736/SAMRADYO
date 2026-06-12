@@ -146,7 +146,8 @@
 (() => {
     'use strict';
 
-    const API = 'https://radyo-proxy.gower45651.workers.dev';
+    const API        = 'https://yo-yo-backing-paralyze.ngrok-free.dev';
+    const API_STREAM = 'https://radyo-proxy.gower45651.workers.dev';
     const POLL_MS     = 3000;
     const MAX_RETRIES = 5;
     const RETRY_DELAYS = [1000, 2000, 3000, 5000, 8000];
@@ -273,7 +274,7 @@
             sourceBuffer.mode = 'sequence';
 
             fetchAbort = new AbortController();
-            const url = API + '/stream?t=' + Date.now();
+            const url = API_STREAM + '/stream?t=' + Date.now();
 
             let response;
             try {
@@ -348,7 +349,7 @@
 
     /* Fallback: direkt audio src (MSE desteklenmiyorsa) */
     function startDirect() {
-        audio.src = API + '/stream?t=' + Date.now();
+        audio.src = API_STREAM + '/stream?t=' + Date.now();
         audio.volume = volume;
         audio.play().catch(() => scheduleRetry());
     }
