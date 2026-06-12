@@ -185,11 +185,14 @@
 
     audio.volume = volume;
 
-    volSlider.addEventListener('input', () => {
+    function updateVolume() {
         volume = volSlider.value / 100;
         audio.volume = volume;
         volLabel.textContent = volSlider.value + '%';
-    });
+    }
+    volSlider.addEventListener('input', updateVolume);
+    volSlider.addEventListener('change', updateVolume);        // iOS Safari için
+    volSlider.addEventListener('touchmove', updateVolume, { passive: true }); // iOS touch için
 
     /* ── UI ── */
     function showIcon(n) {
@@ -302,8 +305,14 @@
             while (true) {
                 const { done, value } = await fetchReader.read();
                 if (done) {
-                    setState(ST.IDLE);
-                    setStatus('Yayın bitti');
+                    // ffmpeg stream bitti ama yayın devam ediyorsa yeniden bağlan
+                    if (userWantsPlay && isBroadcasting) {
+                        retryCount = 0;
+                        setTimeout(startMSE, 1000);
+                    } else {
+                        setState(ST.IDLE);
+                        setStatus('Yayın bitti');
+                    }
                     break;
                 }
 
@@ -401,8 +410,13 @@
         scheduleRetry();
     });
     audio.addEventListener('ended', () => {
-        setState(ST.IDLE);
-        setStatus('Yayın bitti');
+        if (userWantsPlay && isBroadcasting) {
+            retryCount = 0;
+            setTimeout(startMSE, 1000);
+        } else {
+            setState(ST.IDLE);
+            setStatus('Yayın bitti');
+        }
     });
 
     /* ── Durum sorgulama ── */
