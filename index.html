@@ -11,32 +11,17 @@
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg: #060810;
-            --accent: #2d6fff;
-            --accent2: #6b2dff;
-            --red: #ff3d5a;
-            --text: #e8edf5;
-            --muted: #4a5568;
-            --dim: #111827;
-            --surface: rgba(255,255,255,0.04);
-            --border: rgba(255,255,255,0.07);
+            --bg: #060810; --accent: #2d6fff; --accent2: #6b2dff;
+            --text: #e8edf5; --muted: #4a5568; --dim: #111827;
+            --surface: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.07);
         }
-        html, body {
-            height: 100%; width: 100%;
-            -webkit-text-size-adjust: 100%;
-        }
+        html, body { height: 100%; width: 100%; -webkit-text-size-adjust: 100%; }
         body {
             font-family: 'Space Grotesk', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; flex-direction: column;
+            overflow: hidden; -webkit-font-smoothing: antialiased;
         }
-
-        /* Ambient background glow */
         .ambient {
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background:
@@ -44,72 +29,42 @@
                 radial-gradient(ellipse 40% 40% at 80% 80%, rgba(107,45,255,0.10) 0%, transparent 60%);
             transition: opacity 1.2s;
         }
-        .ambient.dim { opacity: 0.3; }
-
-        /* Grid overlay */
+        .ambient.dim { opacity: 0.25; }
         .grid {
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background-image:
-                linear-gradient(rgba(45,111,255,0.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(45,111,255,0.025) 1px, transparent 1px);
+            background-image: linear-gradient(rgba(45,111,255,0.025) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(45,111,255,0.025) 1px, transparent 1px);
             background-size: 48px 48px;
         }
-
-        /* ── TOPBAR ── */
         .topbar {
             position: relative; z-index: 10;
             display: flex; align-items: center; justify-content: space-between;
             padding: 20px 32px;
         }
-        .logo {
-            display: flex; align-items: center; gap: 10px;
-        }
+        .logo { display: flex; align-items: center; gap: 10px; }
         .logo-icon {
             width: 34px; height: 34px; border-radius: 8px;
             background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-        .logo-icon svg { display: block; }
-        .logo-text {
-            font-size: 15px; font-weight: 700; letter-spacing: 0.02em;
-        }
+        .logo-text { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
         .logo-text span { color: var(--accent); }
-
         .status-pill {
             display: flex; align-items: center; gap: 7px;
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: var(--surface); border: 1px solid var(--border);
             padding: 6px 14px; border-radius: 99px;
-            font-size: 12px; font-weight: 600;
-            letter-spacing: 1.2px; text-transform: uppercase;
-            color: var(--muted);
-            transition: all 0.4s;
+            font-size: 12px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;
+            color: var(--muted); transition: all 0.4s;
         }
-        .status-pill.live {
-            background: rgba(45,111,255,0.1);
-            border-color: rgba(45,111,255,0.3);
-            color: #7aabff;
-        }
-        .status-dot {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: currentColor; flex-shrink: 0;
-        }
-        .status-pill.live .status-dot {
-            animation: blink 1.4s ease-in-out infinite;
-        }
+        .status-pill.live { background: rgba(45,111,255,0.1); border-color: rgba(45,111,255,0.3); color: #7aabff; }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+        .status-pill.live .status-dot { animation: blink 1.4s ease-in-out infinite; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
-
-        /* ── MAIN ── */
         .main {
-            position: relative; z-index: 5;
-            flex: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            position: relative; z-index: 5; flex: 1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 20px 24px;
-            gap: 0;
         }
-
-        /* Visualizer */
         .visualizer {
             display: flex; align-items: flex-end; justify-content: center;
             gap: 4px; height: 48px; margin-bottom: 28px;
@@ -117,147 +72,82 @@
         .bar {
             width: 4px; border-radius: 3px;
             background: linear-gradient(to top, var(--accent), var(--accent2));
-            height: 4px; opacity: 0.5;
-            transition: opacity 0.4s;
+            height: 4px; opacity: 0.4; transition: opacity 0.4s;
         }
         .visualizer.playing .bar { opacity: 1; }
-        .visualizer.playing .bar:nth-child(1)  { animation: wave 0.85s ease-in-out infinite 0.00s }
-        .visualizer.playing .bar:nth-child(2)  { animation: wave 0.85s ease-in-out infinite 0.07s }
-        .visualizer.playing .bar:nth-child(3)  { animation: wave 0.85s ease-in-out infinite 0.14s }
-        .visualizer.playing .bar:nth-child(4)  { animation: wave 0.85s ease-in-out infinite 0.21s }
-        .visualizer.playing .bar:nth-child(5)  { animation: wave 0.85s ease-in-out infinite 0.28s }
-        .visualizer.playing .bar:nth-child(6)  { animation: wave 0.85s ease-in-out infinite 0.35s }
-        .visualizer.playing .bar:nth-child(7)  { animation: wave 0.85s ease-in-out infinite 0.42s }
-        .visualizer.playing .bar:nth-child(8)  { animation: wave 0.85s ease-in-out infinite 0.35s }
-        .visualizer.playing .bar:nth-child(9)  { animation: wave 0.85s ease-in-out infinite 0.28s }
-        .visualizer.playing .bar:nth-child(10) { animation: wave 0.85s ease-in-out infinite 0.21s }
-        .visualizer.playing .bar:nth-child(11) { animation: wave 0.85s ease-in-out infinite 0.14s }
-        .visualizer.playing .bar:nth-child(12) { animation: wave 0.85s ease-in-out infinite 0.07s }
-        .visualizer.playing .bar:nth-child(13) { animation: wave 0.85s ease-in-out infinite 0.00s }
+        .visualizer.playing .bar:nth-child(1)  { animation: wave .85s ease-in-out infinite 0.00s }
+        .visualizer.playing .bar:nth-child(2)  { animation: wave .85s ease-in-out infinite 0.07s }
+        .visualizer.playing .bar:nth-child(3)  { animation: wave .85s ease-in-out infinite 0.14s }
+        .visualizer.playing .bar:nth-child(4)  { animation: wave .85s ease-in-out infinite 0.21s }
+        .visualizer.playing .bar:nth-child(5)  { animation: wave .85s ease-in-out infinite 0.28s }
+        .visualizer.playing .bar:nth-child(6)  { animation: wave .85s ease-in-out infinite 0.35s }
+        .visualizer.playing .bar:nth-child(7)  { animation: wave .85s ease-in-out infinite 0.42s }
+        .visualizer.playing .bar:nth-child(8)  { animation: wave .85s ease-in-out infinite 0.35s }
+        .visualizer.playing .bar:nth-child(9)  { animation: wave .85s ease-in-out infinite 0.28s }
+        .visualizer.playing .bar:nth-child(10) { animation: wave .85s ease-in-out infinite 0.21s }
+        .visualizer.playing .bar:nth-child(11) { animation: wave .85s ease-in-out infinite 0.14s }
+        .visualizer.playing .bar:nth-child(12) { animation: wave .85s ease-in-out infinite 0.07s }
+        .visualizer.playing .bar:nth-child(13) { animation: wave .85s ease-in-out infinite 0.00s }
         @keyframes wave { 0%,100%{height:4px} 50%{height:38px} }
-
-        /* Hint text */
         .hint {
-            font-size: 11px; font-weight: 600; letter-spacing: 2px;
-            text-transform: uppercase; color: var(--accent);
-            margin-bottom: 18px; opacity: 0;
-            transition: opacity 0.5s;
+            font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--accent); margin-bottom: 18px; opacity: 0; transition: opacity 0.5s;
             display: flex; align-items: center; gap: 6px;
         }
         .hint.visible { opacity: 1; }
-        .hint-arrow { font-size: 9px; }
-
-        /* Song title */
         .song-title {
-            font-size: clamp(28px, 5vw, 52px);
-            font-weight: 800;
-            line-height: 1.1;
-            text-align: center;
-            letter-spacing: -0.02em;
-            max-width: 820px;
-            transition: opacity 0.3s;
-            margin-bottom: 14px;
-            word-break: break-word;
+            font-size: clamp(28px, 5vw, 52px); font-weight: 800;
+            line-height: 1.1; text-align: center; letter-spacing: -0.02em;
+            max-width: 820px; transition: opacity 0.3s; margin-bottom: 14px; word-break: break-word;
         }
-
-        /* Station label */
         .station-label {
-            font-size: 12px; font-weight: 500;
-            letter-spacing: 3px; text-transform: uppercase;
+            font-size: 12px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase;
             color: var(--muted); margin-bottom: 40px;
         }
-
-        /* Play button */
         .btn-play {
-            width: 68px; height: 68px; border-radius: 50%;
-            border: none; cursor: pointer;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            color: white;
+            width: 68px; height: 68px; border-radius: 50%; border: none; cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white;
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.18s, box-shadow 0.18s, opacity 0.3s;
             box-shadow: 0 8px 32px rgba(45,111,255,0.45);
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            user-select: none; -webkit-user-select: none;
-            margin-bottom: 36px;
+            -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+            user-select: none; -webkit-user-select: none; margin-bottom: 36px;
         }
         .btn-play:active { transform: scale(0.91); }
-        @media(hover:hover) {
-            .btn-play:not(.offline):not(.loading):hover {
-                transform: scale(1.08);
-                box-shadow: 0 14px 42px rgba(45,111,255,0.6);
-            }
-        }
+        @media(hover:hover){ .btn-play:not(.offline):not(.loading):hover { transform:scale(1.08); box-shadow:0 14px 42px rgba(45,111,255,0.6); } }
         .btn-play.offline { background: var(--dim); box-shadow: none; opacity: 0.35; cursor: default; }
         .btn-play.loading { animation: pulse-btn 1s ease-in-out infinite; }
         @keyframes pulse-btn { 0%,100%{opacity:1} 50%{opacity:0.5} }
         .spin-icon { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Volume row */
-        .volume-row {
-            display: flex; align-items: center; gap: 12px;
-            width: 100%; max-width: 340px;
-        }
+        .volume-row { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 340px; }
         .vol-icon { color: var(--muted); flex-shrink: 0; }
         input[type=range] {
-            -webkit-appearance: none; appearance: none;
-            flex: 1; height: 5px;
-            background: var(--dim); border-radius: 99px;
-            outline: none; cursor: pointer;
-            touch-action: pan-x;
+            -webkit-appearance: none; appearance: none; flex: 1; height: 5px;
+            background: var(--dim); border-radius: 99px; outline: none; cursor: pointer; touch-action: pan-x;
         }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none;
-            width: 22px; height: 22px; border-radius: 50%;
-            background: var(--accent);
-            border: 2px solid var(--bg);
-            box-shadow: 0 0 10px rgba(45,111,255,0.55);
-            margin-top: -8.5px;
+            -webkit-appearance: none; appearance: none; width: 22px; height: 22px;
+            border-radius: 50%; background: var(--accent); border: 2px solid var(--bg);
+            box-shadow: 0 0 10px rgba(45,111,255,0.55); margin-top: -8.5px;
         }
         input[type=range]::-moz-range-thumb {
-            width: 22px; height: 22px; border-radius: 50%;
-            background: var(--accent); border: 2px solid var(--bg);
+            width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg);
         }
-        .vol-label {
-            font-size: 11px; color: var(--muted); min-width: 34px; text-align: right;
-        }
-
-        /* ── FOOTER ── */
-        .footer {
-            position: relative; z-index: 10;
-            display: flex; justify-content: center;
-            padding: 16px 24px 24px;
-        }
+        .vol-label { font-size: 11px; color: var(--muted); min-width: 34px; text-align: right; }
+        .footer { position: relative; z-index: 10; display: flex; justify-content: center; padding: 16px 24px 24px; }
         .listener-pill {
-            font-size: 12px; color: var(--muted);
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 6px 16px; border-radius: 99px;
+            font-size: 12px; color: var(--muted); background: var(--surface);
+            border: 1px solid var(--border); padding: 6px 16px; border-radius: 99px;
         }
-
-        /* Status text below title */
-        .song-status {
-            font-size: 12px; color: var(--muted);
-            margin-bottom: 0; margin-top: -8px;
-            min-height: 18px; margin-bottom: 32px;
-            transition: opacity 0.3s;
-        }
-        .song-status.buffering { color: #f59e0b; }
-
         audio { display: none; }
-
-        @media (max-width: 480px) {
-            .topbar { padding: 16px 20px; }
-            .song-title { font-size: clamp(22px, 7vw, 36px); }
-        }
+        @media (max-width: 480px) { .topbar { padding: 16px 20px; } }
     </style>
 </head>
 <body>
 <div class="ambient" id="ambient"></div>
 <div class="grid"></div>
 
-<!-- Topbar -->
 <div class="topbar">
     <div class="logo">
         <div class="logo-icon">
@@ -273,7 +163,6 @@
     </div>
 </div>
 
-<!-- Main -->
 <div class="main">
     <div class="visualizer" id="visualizer">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -282,15 +171,9 @@
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
         <div class="bar"></div>
     </div>
-
-    <div class="hint" id="hint">
-        <span class="hint-arrow">▶</span>
-        <span>Butona Basarak Başlat</span>
-    </div>
-
+    <div class="hint" id="hint"><span>▶</span><span>Butona Basarak Başlat</span></div>
     <div class="song-title" id="songTitle">—</div>
     <div class="station-label">Mehmet Sam Radyo</div>
-
     <button class="btn-play offline" id="playBtn" aria-label="Oynat / Durdur">
         <svg id="icoPlay" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
         <svg id="icoPause" style="display:none" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
@@ -299,9 +182,6 @@
             <path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>
         </svg>
     </button>
-
-    <div class="song-status" id="songStatus"></div>
-
     <div class="volume-row">
         <svg class="vol-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
@@ -313,28 +193,23 @@
     </div>
 </div>
 
-<!-- Footer -->
 <div class="footer">
     <div class="listener-pill" id="footerInfo">Yayın bekleniyor</div>
 </div>
 
-<audio id="audio" preload="none" playsinline webkit-playsinline x-webkit-airplay="allow"></audio>
+<audio id="audio" preload="none" playsinline webkit-playsinline></audio>
 
 <script>
 (() => {
     'use strict';
 
     const API        = 'https://yo-yo-backing-paralyze.ngrok-free.dev';
-    const API_STREAM = 'https://radyo-proxy.gower45651.workers.dev';
+    const STREAM_URL = 'https://radyo-proxy.gower45651.workers.dev/stream';
     const POLL_MS    = 3000;
-    const MAX_RETRIES = 8;
-    const RETRY_DELAYS = [500, 1000, 1500, 2000, 3000, 4000, 6000, 8000];
 
-    const NGROK_HEADERS = {
-        'ngrok-skip-browser-warning': '1',
-        'Cache-Control': 'no-cache'
-    };
+    const HDRS = { 'ngrok-skip-browser-warning': '1', 'Cache-Control': 'no-cache' };
 
+    // ─── DOM
     const audio      = document.getElementById('audio');
     const playBtn    = document.getElementById('playBtn');
     const icoPlay    = document.getElementById('icoPlay');
@@ -342,7 +217,6 @@
     const icoLoad    = document.getElementById('icoLoad');
     const visualizer = document.getElementById('visualizer');
     const songTitle  = document.getElementById('songTitle');
-    const songStatus = document.getElementById('songStatus');
     const statusPill = document.getElementById('statusPill');
     const pillText   = document.getElementById('pillText');
     const footerInfo = document.getElementById('footerInfo');
@@ -351,500 +225,290 @@
     const hint       = document.getElementById('hint');
     const ambient    = document.getElementById('ambient');
 
-    const ST = { IDLE: 'idle', LOADING: 'loading', PLAYING: 'playing' };
-    let state          = ST.IDLE;
-    let isBroadcasting = false;
+    // ─── State
+    const ST = { IDLE: 0, LOADING: 1, PLAYING: 2 };
+    let st             = ST.IDLE;
+    let broadcasting   = false;
+    let wantsPlay      = false;
     let currentSong    = '';
     let currentStart   = 0;
-    let volume         = 0.8;
-    let retryCount     = 0;
-    let retryTimer     = null;
-    let userWantsPlay  = false;
-    let mse            = null;
-    let sourceBuffer   = null;
-    let fetchReader    = null;
-    let fetchAbort     = null;
+    let vol            = 0.8;
 
-    // ── Warmup audio: yedek audio düğümü (kesintisiz geçiş için)
-    let warmupAudio    = null;
-    let warmupAbort    = null;
-    let warmupReader   = null;
-    let warmupMse      = null;
-    let warmupSb       = null;
-    let warmupReady    = false;
-    const WARMUP_AFTER_MS = 20000; // 20 sn sonra yedek bağlantı kur
-    let warmupTimer    = null;
+    // MSE
+    let mse = null, sb = null, abortCtrl = null, reader = null;
 
-    audio.volume = volume;
+    // Retry
+    let retryTimer  = null;
+    let retryN      = 0;
+    const MAX_RETRY = 10;
+    // Üstel geri çekilme: 200ms, 400, 700, 1000, 1500, 2000, 3000, 4000, 5000, 6000
+    const DELAYS = [200, 400, 700, 1000, 1500, 2000, 3000, 4000, 5000, 6000];
 
-    function updateVolume() {
-        volume = volSlider.value / 100;
-        audio.volume = volume;
-        if (warmupAudio) warmupAudio.volume = volume;
+    // ─── Volume
+    audio.volume = vol;
+    function applyVol() {
+        vol = volSlider.value / 100;
+        audio.volume = vol;
         volLabel.textContent = volSlider.value + '%';
     }
-    volSlider.addEventListener('input', updateVolume);
-    volSlider.addEventListener('change', updateVolume);
-    volSlider.addEventListener('touchmove', updateVolume, { passive: true });
+    volSlider.addEventListener('input', applyVol);
+    volSlider.addEventListener('change', applyVol);
+    volSlider.addEventListener('touchmove', applyVol, { passive: true });
 
-    /* ── UI ── */
-    function showIcon(n) {
+    // ─── UI helpers
+    function icon(n) {
         icoPlay.style.display  = n === 'play'  ? '' : 'none';
         icoPause.style.display = n === 'pause' ? '' : 'none';
         icoLoad.style.display  = n === 'load'  ? '' : 'none';
     }
-    function setState(s) {
-        state = s;
-        const playing = s === ST.PLAYING;
-        const loading = s === ST.LOADING;
-        showIcon(loading ? 'load' : playing ? 'pause' : 'play');
+    function setSt(s) {
+        st = s;
+        const playing = s === ST.PLAYING, loading = s === ST.LOADING;
+        icon(loading ? 'load' : playing ? 'pause' : 'play');
         visualizer.classList.toggle('playing', playing);
         playBtn.classList.toggle('loading', loading);
         ambient.classList.toggle('dim', !playing);
-        hint.classList.toggle('visible', s === ST.IDLE && isBroadcasting);
+        hint.classList.toggle('visible', s === ST.IDLE && broadcasting);
     }
     function setBroadcast(on) {
-        isBroadcasting = on;
+        broadcasting = on;
         statusPill.classList.toggle('live', on);
         pillText.textContent = on ? 'BAĞLANDI' : 'Offline';
         playBtn.classList.toggle('offline', !on);
         playBtn.style.opacity = on ? '' : '0.35';
-        hint.classList.toggle('visible', on && state === ST.IDLE);
+        hint.classList.toggle('visible', on && st === ST.IDLE);
     }
     function setTitle(t) {
         if (t === songTitle.textContent) return;
         songTitle.style.opacity = '0';
-        setTimeout(() => { songTitle.textContent = t; songTitle.style.opacity = '1'; }, 250);
-    }
-    function setStatus(t, type) {
-        songStatus.textContent = t;
-        songStatus.className = 'song-status' + (type ? ' ' + type : '');
+        setTimeout(() => { songTitle.textContent = t; songTitle.style.opacity = '1'; }, 200);
     }
 
-    /* ── MSE Stream ── */
-    function stopMSE(keepWarmup) {
-        if (fetchAbort) { fetchAbort.abort(); fetchAbort = null; }
-        fetchReader = null;
+    // ─── CORE: MSE düşük-gecikme stream
+    // Strateji: fetch() ile binary akış al, MediaSource'a besle.
+    // Buffer hedefi: 3 saniye öncesi temizlenir → daima küçük buffer → düşük gecikme.
+    // Hata/kesinti → hemen yeniden bağlan (kullanıcı fark etmez).
+
+    function teardown() {
+        if (abortCtrl) { abortCtrl.abort(); abortCtrl = null; }
+        reader = null;
         audio.pause();
-        try { audio.src = ''; } catch(e) {}
-        if (mse && mse.readyState === 'open') {
-            try { mse.endOfStream(); } catch(e) {}
-        }
-        mse = null;
-        sourceBuffer = null;
-        if (!keepWarmup) stopWarmup();
+        try { if (audio.src) { URL.revokeObjectURL(audio.src); audio.src = ''; } } catch(e){}
+        if (mse && mse.readyState === 'open') { try { mse.endOfStream(); } catch(e){} }
+        mse = null; sb = null;
     }
 
-    function startMSE() {
-        stopMSE(true);
-        setState(ST.LOADING);
-        setStatus('Bağlanıyor...');
+    function connect() {
+        teardown();
+        setSt(ST.LOADING);
 
-        if (!window.MediaSource) {
-            startDirect();
+        // MSE desteklenmiyor (eski Safari) → direkt src
+        if (!window.MediaSource || !MediaSource.isTypeSupported('audio/mpeg')) {
+            audio.src = STREAM_URL + '?t=' + Date.now();
+            audio.volume = vol;
+            audio.load();
+            audio.play().catch(() => scheduleRetry());
             return;
         }
 
         mse = new MediaSource();
-        audio.src = URL.createObjectURL(mse);
-        audio.volume = volume;
+        const objectUrl = URL.createObjectURL(mse);
+        audio.src = objectUrl;
+        audio.volume = vol;
 
-        mse.addEventListener('sourceopen', async () => {
-            try {
-                sourceBuffer = mse.addSourceBuffer('audio/mpeg');
-            } catch(e) {
-                stopMSE(true);
-                startDirect();
-                return;
-            }
-            sourceBuffer.mode = 'sequence';
+        mse.addEventListener('sourceopen', () => {
+            URL.revokeObjectURL(objectUrl);
+            try { sb = mse.addSourceBuffer('audio/mpeg'); }
+            catch(e) { teardown(); audio.src = STREAM_URL + '?t=' + Date.now(); audio.play().catch(()=>{}); return; }
 
-            fetchAbort = new AbortController();
-            const url = API_STREAM + '/stream?t=' + Date.now();
+            sb.mode = 'sequence';
+            sb.addEventListener('error', () => scheduleRetry());
 
-            let response;
-            try {
-                response = await fetch(url, {
-                    signal: fetchAbort.signal,
-                    headers: NGROK_HEADERS
-                });
-            } catch(e) {
-                if (e.name === 'AbortError') return;
-                scheduleRetry();
-                return;
-            }
+            abortCtrl = new AbortController();
 
-            if (!response.ok) {
-                setStatus('Yayın yok');
-                setState(ST.IDLE);
-                return;
-            }
-
-            fetchReader = response.body.getReader();
-            pumpStream();
+            fetch(STREAM_URL + '?t=' + Date.now(), {
+                signal: abortCtrl.signal,
+                headers: HDRS,
+                // Tarayıcıya önbellek yapma, direkt akış al
+                cache: 'no-store'
+            }).then(async res => {
+                if (!res.ok) { scheduleRetry(); return; }
+                reader = res.body.getReader();
+                await pump();
+            }).catch(e => {
+                if (e.name !== 'AbortError') scheduleRetry();
+            });
         }, { once: true });
 
+        // Audio oynatmayı başlat (MSE buffer dolunca ses çıkar)
         audio.play().catch(() => {});
     }
 
-    async function pumpStream() {
-        if (!fetchReader || !sourceBuffer || !mse) return;
+    async function pump() {
+        // Async döngü: chunk oku → sourceBuffer'a ekle → tekrar et
         try {
             while (true) {
-                const { done, value } = await fetchReader.read();
+                if (!reader || !sb || !mse || mse.readyState !== 'open') break;
+
+                const { done, value } = await reader.read();
+
                 if (done) {
-                    if (userWantsPlay && isBroadcasting) {
-                        retryCount = 0;
-                        // Warmup hazır mı? Sessizce geç
-                        if (warmupReady && warmupAudio) {
-                            seamlessSwitch();
-                        } else {
-                            setTimeout(startMSE, 300);
-                        }
-                    } else {
-                        setState(ST.IDLE);
-                        setStatus('Yayın bitti');
-                    }
-                    break;
+                    // Stream kapandı; yayın devam ediyorsa anında yeniden bağlan
+                    if (wantsPlay && broadcasting) { retryN = 0; connect(); }
+                    else { setSt(ST.IDLE); }
+                    return;
                 }
 
-                if (sourceBuffer.updating) {
-                    await new Promise(r => sourceBuffer.addEventListener('updateend', r, { once: true }));
+                // SourceBuffer meşgulse bekle (bu await kullanıcıya hiç belli olmaz)
+                if (sb.updating) {
+                    await new Promise(r => sb.addEventListener('updateend', r, { once: true }));
                 }
-                if (!sourceBuffer || !mse || mse.readyState !== 'open') break;
+                if (!sb || !mse || mse.readyState !== 'open') break;
 
                 try {
-                    sourceBuffer.appendBuffer(value);
-                    // Buffer çok dolmasın, eski kısımları sil
-                    trimBuffer();
+                    sb.appendBuffer(value);
                 } catch(e) {
                     if (e.name === 'QuotaExceededError') {
-                        await forceFlushBuffer();
-                        try { sourceBuffer.appendBuffer(value); } catch(e2) {}
+                        // Buffer doldu: agresif temizle
+                        await flushOld(true);
+                        if (sb && mse && mse.readyState === 'open' && !sb.updating) {
+                            try { sb.appendBuffer(value); } catch(_){}
+                        }
                     }
+                    // Diğer hatalar: devam et
                 }
+
+                // Her chunk sonrası eski buffer'ı temizle (3 sn öncesi)
+                // Bu sayede gecikme birikmiyor
+                if (!sb.updating) flushOld(false);
             }
         } catch(e) {
             if (e.name === 'AbortError') return;
-            if (userWantsPlay && isBroadcasting) {
-                if (warmupReady && warmupAudio) {
-                    seamlessSwitch();
-                } else {
-                    scheduleRetry();
-                }
-            }
+            if (wantsPlay && broadcasting) scheduleRetry();
+            else setSt(ST.IDLE);
         }
     }
 
-    function trimBuffer() {
-        if (!sourceBuffer || sourceBuffer.updating || !mse || mse.readyState !== 'open') return;
-        if (sourceBuffer.buffered.length === 0) return;
-        const behind = audio.currentTime - 10; // 10 saniye öncesini tut
-        const start  = sourceBuffer.buffered.start(0);
-        if (behind > start + 1) {
-            try { sourceBuffer.remove(start, behind); } catch(e) {}
+    function flushOld(force) {
+        if (!sb || sb.updating || !mse || mse.readyState !== 'open') return;
+        if (!sb.buffered.length) return;
+        const bufStart = sb.buffered.start(0);
+        const ct       = audio.currentTime;
+        // Normal: 3 saniye öncesini sil. Force: mevcut konumdan 1 sn öncesini sil.
+        const cutPoint = force ? ct - 1 : ct - 3;
+        if (cutPoint > bufStart + 0.5) {
+            try { sb.remove(bufStart, cutPoint); } catch(_){}
         }
-    }
-
-    async function forceFlushBuffer() {
-        if (!sourceBuffer || !mse || mse.readyState !== 'open') return;
-        if (sourceBuffer.buffered.length === 0) return;
-        const start = sourceBuffer.buffered.start(0);
-        const end   = audio.currentTime - 5;
-        if (end > start) {
-            try {
-                sourceBuffer.remove(start, end);
-                await new Promise(r => sourceBuffer.addEventListener('updateend', r, { once: true }));
-            } catch(e) {}
-        }
-    }
-
-    /* Fallback: direkt audio src */
-    function startDirect() {
-        audio.src = API_STREAM + '/stream?t=' + Date.now();
-        audio.volume = volume;
-        audio.play().catch(() => scheduleRetry());
-    }
-
-    /* ── WARMUP (yedek bağlantı) ── */
-    // Kullanıcı dinlerken arka planda ikinci bir bağlantı açılır.
-    // Kesinti olursa bu hazır bağlantıya sessizce geçilir.
-    function stopWarmup() {
-        clearTimeout(warmupTimer);
-        if (warmupAbort) { warmupAbort.abort(); warmupAbort = null; }
-        warmupReader = null;
-        if (warmupAudio) {
-            warmupAudio.pause();
-            try { warmupAudio.src = ''; } catch(e) {}
-            warmupAudio = null;
-        }
-        if (warmupMse && warmupMse.readyState === 'open') {
-            try { warmupMse.endOfStream(); } catch(e) {}
-        }
-        warmupMse = null;
-        warmupSb = null;
-        warmupReady = false;
-    }
-
-    function scheduleWarmup() {
-        stopWarmup();
-        warmupTimer = setTimeout(initWarmup, WARMUP_AFTER_MS);
-    }
-
-    async function initWarmup() {
-        if (!userWantsPlay || !isBroadcasting || !window.MediaSource) return;
-        warmupReady = false;
-
-        warmupAudio = new Audio();
-        warmupAudio.volume = 0; // sessiz
-        warmupAudio.preload = 'none';
-
-        warmupMse = new MediaSource();
-        warmupAudio.src = URL.createObjectURL(warmupMse);
-
-        warmupMse.addEventListener('sourceopen', async () => {
-            try {
-                warmupSb = warmupMse.addSourceBuffer('audio/mpeg');
-            } catch(e) { stopWarmup(); return; }
-            warmupSb.mode = 'sequence';
-
-            warmupAbort = new AbortController();
-            const url = API_STREAM + '/stream?t=' + Date.now();
-
-            let response;
-            try {
-                response = await fetch(url, {
-                    signal: warmupAbort.signal,
-                    headers: NGROK_HEADERS
-                });
-            } catch(e) { if (e.name !== 'AbortError') stopWarmup(); return; }
-
-            if (!response.ok) { stopWarmup(); return; }
-
-            warmupReader = response.body.getReader();
-            pumpWarmup();
-        }, { once: true });
-
-        warmupAudio.play().catch(() => {}); // buffer doldurmak için başlat
-    }
-
-    async function pumpWarmup() {
-        if (!warmupReader || !warmupSb || !warmupMse) return;
-        let chunkCount = 0;
-        try {
-            while (true) {
-                const { done, value } = await warmupReader.read();
-                if (done) { stopWarmup(); break; }
-                if (warmupSb.updating) {
-                    await new Promise(r => warmupSb.addEventListener('updateend', r, { once: true }));
-                }
-                if (!warmupSb || !warmupMse || warmupMse.readyState !== 'open') break;
-                try { warmupSb.appendBuffer(value); } catch(e) {}
-                chunkCount++;
-                if (chunkCount === 5) warmupReady = true; // 5 chunk sonra hazır say
-            }
-        } catch(e) {
-            if (e.name !== 'AbortError') stopWarmup();
-        }
-    }
-
-    /* Ana audio'dan warmup'a sessiz geçiş */
-    function seamlessSwitch() {
-        if (!warmupAudio || !warmupReady) {
-            scheduleRetry();
-            return;
-        }
-        // warmup'ı ana audio yap
-        const oldAudio = audio;
-        // warmup ses seviyesini çıkar
-        warmupAudio.volume = volume;
-        // warmup'ı "ana" olarak kullan (doğrudan play)
-        warmupAudio.play().catch(() => {});
-
-        // Eski stream'i durdur
-        if (fetchAbort) { fetchAbort.abort(); fetchAbort = null; }
-        oldAudio.pause();
-        try { oldAudio.src = ''; } catch(e) {}
-
-        // warmup'ı ana audio element'e "transfer" edemeyiz,
-        // ama warmup yeterince bufferlıysa devam eder.
-        // Yeni warmup scheduleı başlat
-        warmupReady = false;
-        const prevWarmupAudio = warmupAudio;
-        warmupAudio = null;
-        warmupMse = null;
-        warmupSb = null;
-
-        // Yeni ana olarak yeniden bağlan; aynı anda warmup da başlatılacak
-        retryCount = 0;
-        setTimeout(startMSE, 100);
-
-        // Geçiş sırasında ses için prevWarmupAudio biraz süre çalar
-        setTimeout(() => { prevWarmupAudio.pause(); }, 3000);
     }
 
     function scheduleRetry() {
-        if (!userWantsPlay || !isBroadcasting) { setState(ST.IDLE); return; }
-        if (retryCount >= MAX_RETRIES) {
-            setState(ST.IDLE);
-            setStatus('Bağlanamadı — tekrar dene');
-            retryCount = 0;
-            return;
+        if (!wantsPlay || !broadcasting) { setSt(ST.IDLE); return; }
+        if (retryN >= MAX_RETRY) {
+            // Max retry → sıfırla ve tekrar dene (sonsuz döngü değil, kullanıcı durdurana kadar)
+            retryN = 0;
         }
-        const delay = RETRY_DELAYS[Math.min(retryCount, RETRY_DELAYS.length - 1)];
-        // Kullanıcıya tamponlanıyor değil, sadece sessizce yeniden bağlan
-        retryCount++;
+        const delay = DELAYS[Math.min(retryN, DELAYS.length - 1)];
+        retryN++;
         clearTimeout(retryTimer);
-        retryTimer = setTimeout(startMSE, delay);
+        retryTimer = setTimeout(connect, delay);
     }
 
-    function stopPlay(reason) {
-        userWantsPlay = false;
+    function stop() {
+        wantsPlay = false;
         clearTimeout(retryTimer);
-        stopMSE();
-        stopWarmup();
-        setState(ST.IDLE);
-        setStatus(reason || '');
-        retryCount = 0;
+        teardown();
+        setSt(ST.IDLE);
+        retryN = 0;
     }
 
-    /* ── Buton ── */
-    let lastTap = 0;
-    function handleInteract(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const now = Date.now();
-        if (now - lastTap < 350) return;
-        lastTap = now;
-        if (!isBroadcasting) return;
-        if (state === ST.PLAYING || state === ST.LOADING) {
-            stopPlay('');
-        } else {
-            userWantsPlay = true;
-            retryCount = 0;
-            startMSE();
-        }
-    }
-    playBtn.addEventListener('click', handleInteract);
-    playBtn.addEventListener('touchend', handleInteract, { passive: false });
-
-    /* ── Audio events ── */
+    // ─── Audio events
     audio.addEventListener('playing', () => {
         clearTimeout(retryTimer);
-        retryCount = 0;
-        setState(ST.PLAYING);
-        setStatus('');
-        // Warmup'ı zamanla başlat
-        scheduleWarmup();
-    });
-    audio.addEventListener('waiting', () => {
-        // Tamponlama durumunda kullanıcıya gösterme, arka planda çöz
-        if (state === ST.PLAYING) {
-            // Sessizce yeniden bağlanmayı dene
-            if (userWantsPlay && isBroadcasting) {
-                setTimeout(() => {
-                    // Hala waiting durumundaysa yeniden bağlan
-                    if (audio.readyState < 3 && userWantsPlay) {
-                        retryCount = 0;
-                        startMSE();
-                    }
-                }, 1500);
-            }
-        }
-    });
-    audio.addEventListener('error', () => {
-        if (!userWantsPlay) return;
-        scheduleRetry();
-    });
-    audio.addEventListener('ended', () => {
-        if (userWantsPlay && isBroadcasting) {
-            retryCount = 0;
-            setTimeout(startMSE, 300);
-        } else {
-            setState(ST.IDLE);
-            setStatus('');
-        }
-    });
-    audio.addEventListener('stalled', () => {
-        if (!userWantsPlay || !isBroadcasting) return;
-        setTimeout(() => {
-            if (audio.readyState < 3 && userWantsPlay) {
-                retryCount = 0;
-                startMSE();
-            }
-        }, 2000);
+        retryN = 0;
+        setSt(ST.PLAYING);
     });
 
-    /* ── Durum sorgulama ── */
-    async function checkStatus() {
+    // waiting / stalled: sessizce yeniden bağlan, kullanıcıya gösterme
+    function onStall() {
+        if (!wantsPlay || !broadcasting) return;
+        // 800ms içinde toparlanmazsa yeniden bağlan
+        clearTimeout(retryTimer);
+        retryTimer = setTimeout(() => {
+            if (wantsPlay && broadcasting && audio.readyState < 3) {
+                retryN = 0;
+                connect();
+            }
+        }, 800);
+    }
+    audio.addEventListener('waiting', onStall);
+    audio.addEventListener('stalled', onStall);
+    audio.addEventListener('error',   () => { if (wantsPlay) { retryN = 0; scheduleRetry(); } });
+    audio.addEventListener('ended',   () => { if (wantsPlay && broadcasting) { retryN = 0; connect(); } else setSt(ST.IDLE); });
+
+    // ─── Buton
+    let lastTap = 0;
+    function handleInteract(e) {
+        e.preventDefault(); e.stopPropagation();
+        const now = Date.now();
+        if (now - lastTap < 300) return;
+        lastTap = now;
+        if (!broadcasting) return;
+        if (st === ST.PLAYING || st === ST.LOADING) {
+            stop();
+        } else {
+            wantsPlay = true; retryN = 0;
+            connect();
+        }
+    }
+    playBtn.addEventListener('click',    handleInteract);
+    playBtn.addEventListener('touchend', handleInteract, { passive: false });
+
+    // ─── Status polling
+    async function poll() {
         try {
             const ctrl = new AbortController();
-            const tid = setTimeout(() => ctrl.abort(), 5000);
-            const res = await fetch(API + '/status', {
-                cache: 'no-store',
-                signal: ctrl.signal,
-                headers: NGROK_HEADERS
-            });
+            const tid  = setTimeout(() => ctrl.abort(), 4000);
+            const res  = await fetch(API + '/status', { cache: 'no-store', signal: ctrl.signal, headers: HDRS });
             clearTimeout(tid);
-            if (!res.ok) throw new Error('HTTP ' + res.status);
+            if (!res.ok) throw 0;
             const data = await res.json();
 
-            const wasBroadcasting = isBroadcasting;
+            const wasBroadcasting = broadcasting;
             setBroadcast(data.broadcasting);
 
             if (data.broadcasting) {
                 if (data.song !== currentSong) {
-                    setTitle(data.song);
-                    currentSong = data.song;
+                    setTitle(data.song); currentSong = data.song;
                     footerInfo.textContent = 'Canlı yayın';
                 }
                 const songChanged = currentStart && data.start_time && currentStart !== data.start_time;
                 currentStart = data.start_time;
-
-                if (songChanged && state === ST.PLAYING) {
-                    retryCount = 0;
-                    stopWarmup();
-                    startMSE();
-                }
-                if (!wasBroadcasting) {
-                    setStatus('Yayın başladı');
-                    if (userWantsPlay) { retryCount = 0; startMSE(); }
-                }
+                if (songChanged && st === ST.PLAYING) { retryN = 0; connect(); }
+                if (!wasBroadcasting && wantsPlay) { retryN = 0; connect(); }
             } else {
                 if (currentSong !== '—') { setTitle('—'); currentSong = '—'; }
                 currentStart = 0;
                 footerInfo.textContent = 'Yayın bekleniyor';
-                if (state !== ST.IDLE) stopPlay('');
-                else setStatus('');
+                if (st !== ST.IDLE) stop();
             }
         } catch(e) {
             setBroadcast(false);
             setTitle('—'); currentSong = '—'; currentStart = 0;
             footerInfo.textContent = 'Bağlantı yok';
-            setStatus('Sunucuya ulaşılamıyor');
-            if (state !== ST.IDLE) setState(ST.IDLE);
+            if (st !== ST.IDLE) setSt(ST.IDLE);
         }
     }
 
-    /* ── Sayfa görünürlüğü ── */
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) return;
-        checkStatus();
-        if (userWantsPlay && isBroadcasting && state === ST.IDLE) {
-            retryCount = 0; startMSE();
-        }
+        poll();
+        if (wantsPlay && broadcasting && st === ST.IDLE) { retryN = 0; connect(); }
     });
-    window.addEventListener('online', () => {
-        checkStatus();
-        if (userWantsPlay && isBroadcasting) { retryCount = 0; startMSE(); }
-    });
-    window.addEventListener('offline', () => {
-        setBroadcast(false);
-        setStatus('İnternet bağlantısı yok');
-    });
+    window.addEventListener('online',  () => { poll(); if (wantsPlay && broadcasting) { retryN = 0; connect(); } });
+    window.addEventListener('offline', () => { setBroadcast(false); });
 
-    checkStatus();
-    setInterval(checkStatus, POLL_MS);
+    poll();
+    setInterval(poll, POLL_MS);
 })();
 </script>
 </body>
