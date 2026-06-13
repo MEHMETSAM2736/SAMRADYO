@@ -5,139 +5,261 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#080c14">
-    <title>Canlı Radyo</title>
+    <meta name="theme-color" content="#050810">
+    <title>Radyo</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg: #080c14; --surface: #0e1520; --border: rgba(255,255,255,0.06);
+            --bg: #050810; --surface: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.07);
             --accent: #3d7fff; --accent2: #7c3dff; --red: #ff3d5a;
-            --text: #e8edf5; --muted: #4a5568; --dim: #1e2a3a;
+            --text: #f0f4ff; --muted: #3d4a60; --dim: #111827;
         }
         html, body { height: 100%; -webkit-text-size-adjust: 100%; }
         body {
             font-family: 'Space Grotesk', sans-serif;
             background: var(--bg); color: var(--text);
-            min-height: 100vh; display: flex;
+            min-height: 100vh; display: flex; flex-direction: column;
+            -webkit-font-smoothing: antialiased; overflow: hidden;
+        }
+        .bg-blur {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 30% 80%, rgba(61,127,255,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 75% 20%, rgba(124,61,255,0.07) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 28px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(5,8,16,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        }
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .logo-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .logo-icon svg { width: 16px; height: 16px; fill: white; }
+        .logo-text {
+            font-size: 15px; font-weight: 700; letter-spacing: 0.5px;
+            color: var(--text);
+        }
+        .logo-text span { color: var(--accent); }
+        .status-pill {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            padding: 6px 14px; border-radius: 99px;
+            font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+            text-transform: uppercase; color: var(--muted);
+            transition: all 0.4s;
+        }
+        .status-pill.live { border-color: rgba(255,61,90,0.25); color: var(--red); background: rgba(255,61,90,0.07); }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .status-pill.live .status-dot { animation: blink 1.4s ease-in-out infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+        /* ── MAIN CONTENT ── */
+        .main {
+            flex: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            overflow: hidden; -webkit-font-smoothing: antialiased;
-        }
-        body::before {
-            content: ''; position: fixed; inset: 0;
-            background-image: linear-gradient(rgba(61,127,255,0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(61,127,255,0.03) 1px, transparent 1px);
-            background-size: 40px 40px; pointer-events: none; z-index: 0;
-        }
-        .glow-1 { position: fixed; top: -200px; left: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(61,127,255,0.07) 0%, transparent 70%); pointer-events: none; }
-        .glow-2 { position: fixed; bottom: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(124,61,255,0.07) 0%, transparent 70%); pointer-events: none; }
-        .card {
-            width: 360px; max-width: calc(100vw - 32px);
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 20px; padding: 32px 28px;
             position: relative; z-index: 1;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            padding: 100px 24px 140px;
+            text-align: center;
         }
-        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-        .station-name { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
-        .live-badge { display: flex; align-items: center; gap: 6px; background: rgba(255,61,90,0.1); border: 1px solid rgba(255,61,90,0.2); color: var(--red); padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; transition: all 0.4s; }
-        .live-badge.offline { background: rgba(74,85,104,0.15); border-color: rgba(74,85,104,0.3); color: var(--muted); }
-        .live-dot { width: 6px; height: 6px; background: currentColor; border-radius: 50%; }
-        .live-badge:not(.offline) .live-dot { animation: blink 1.4s ease-in-out infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        .vinyl-wrap { position: relative; width: 180px; height: 180px; margin: 0 auto 28px; }
-        .vinyl { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #1a1a2e 0%,#1a1a2e 18%,transparent 18.5%,transparent 19%,#0d0d1a 19%,#0d0d1a 28%,#111122 28%,#111122 35%,#0d0d1a 35%,#0d0d1a 43%,#111122 43%,#111122 50%,#0d0d1a 50%,#0d0d1a 58%,#111122 58%,#111122 65%,#0d0d1a 65%,#0d0d1a 73%,#111122 73%,#111122 80%,#0d0d1a 80%,#0d0d1a 88%,#111122 88%); box-shadow: 0 0 0 2px rgba(255,255,255,0.03),0 20px 40px rgba(0,0,0,0.6); position: relative; will-change: transform; }
-        .vinyl::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:36px; height:36px; border-radius:50%; background:radial-gradient(circle,#2a2a3e 0%,#1a1a2e 100%); border:1px solid rgba(255,255,255,0.08); }
-        .vinyl-ring { position:absolute; inset:19%; border-radius:50%; background:conic-gradient(var(--accent) 0deg,var(--accent2) 120deg,#ff3d7f 240deg,var(--accent) 360deg); opacity:0; transition:opacity 0.6s; }
-        .vinyl-ring::after { content:''; position:absolute; inset:15%; border-radius:50%; background:var(--bg); }
-        .vinyl-wrap.spinning .vinyl-ring { opacity:0.6; }
-        .vinyl-wrap.spinning .vinyl { animation:spin 3s linear infinite; box-shadow:0 0 0 2px rgba(255,255,255,0.03),0 20px 50px rgba(61,127,255,0.25),0 0 40px rgba(61,127,255,0.15); }
+
+        /* ── VISUALIZER ── */
+        .visualizer {
+            display: flex; align-items: flex-end; justify-content: center;
+            gap: 4px; height: 40px; margin-bottom: 28px;
+        }
+        .bar {
+            width: 3px; border-radius: 2px;
+            background: linear-gradient(180deg, var(--accent), var(--accent2));
+            height: 3px; opacity: 0.5;
+        }
+        .visualizer.playing .bar { opacity: 1; }
+        .visualizer.playing .bar:nth-child(1){animation:wave 0.85s ease-in-out infinite 0.00s}
+        .visualizer.playing .bar:nth-child(2){animation:wave 0.85s ease-in-out infinite 0.07s}
+        .visualizer.playing .bar:nth-child(3){animation:wave 0.85s ease-in-out infinite 0.14s}
+        .visualizer.playing .bar:nth-child(4){animation:wave 0.85s ease-in-out infinite 0.21s}
+        .visualizer.playing .bar:nth-child(5){animation:wave 0.85s ease-in-out infinite 0.28s}
+        .visualizer.playing .bar:nth-child(6){animation:wave 0.85s ease-in-out infinite 0.35s}
+        .visualizer.playing .bar:nth-child(7){animation:wave 0.85s ease-in-out infinite 0.28s}
+        .visualizer.playing .bar:nth-child(8){animation:wave 0.85s ease-in-out infinite 0.21s}
+        .visualizer.playing .bar:nth-child(9){animation:wave 0.85s ease-in-out infinite 0.14s}
+        .visualizer.playing .bar:nth-child(10){animation:wave 0.85s ease-in-out infinite 0.07s}
+        .visualizer.playing .bar:nth-child(11){animation:wave 0.85s ease-in-out infinite 0.00s}
+        .visualizer.playing .bar:nth-child(12){animation:wave 0.85s ease-in-out infinite 0.07s}
+        .visualizer.playing .bar:nth-child(13){animation:wave 0.85s ease-in-out infinite 0.14s}
+        .visualizer.playing .bar:nth-child(14){animation:wave 0.85s ease-in-out infinite 0.21s}
+        .visualizer.playing .bar:nth-child(15){animation:wave 0.85s ease-in-out infinite 0.28s}
+        @keyframes wave { 0%,100%{height:3px} 50%{height:34px} }
+
+        /* ── SONG META ── */
+        .song-hint {
+            font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--accent); margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px; justify-content: center;
+        }
+        .song-hint-icon { width: 12px; height: 12px; }
+        .song-title {
+            font-size: clamp(28px, 6vw, 64px);
+            font-weight: 700;
+            line-height: 1.15;
+            color: var(--text);
+            margin-bottom: 14px;
+            max-width: 700px;
+            transition: opacity 0.3s;
+            word-break: break-word;
+        }
+        .station-label {
+            font-size: 12px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 40px;
+        }
+
+        /* ── CONTROLS ── */
+        .controls-row {
+            display: flex; flex-direction: column; align-items: center; gap: 24px;
+        }
+        .btn-play {
+            width: 68px; height: 68px; border-radius: 50%; border: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s, opacity 0.2s;
+            box-shadow: 0 0 0 8px rgba(61,127,255,0.1), 0 0 0 16px rgba(61,127,255,0.05);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none; -webkit-user-select: none;
+        }
+        .btn-play:active { transform: scale(0.93); }
+        @media(hover:hover){ .btn-play:not(.offline):not(.loading):hover { transform:scale(1.07); box-shadow: 0 0 0 10px rgba(61,127,255,0.15), 0 0 0 20px rgba(61,127,255,0.07); } }
+        .btn-play.offline { background: #1a2130; box-shadow: none; cursor: default; opacity: 0.4; }
+        .btn-play.loading { animation: pulse-btn 1s ease-in-out infinite; }
+        @keyframes pulse-btn { 0%,100%{opacity:1} 50%{opacity:0.45} }
+        .spin-icon { animation: spin 1s linear infinite; }
         @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-        .song-info { text-align:center; margin-bottom:24px; min-height:52px; }
-        .song-title { font-size:16px; font-weight:600; color:var(--text); margin-bottom:4px; transition:opacity 0.3s; line-height:1.3; word-break:break-word; padding:0 4px; }
-        .song-status { font-size:12px; color:var(--muted); }
-        .visualizer { display:flex; align-items:flex-end; justify-content:center; gap:3px; height:28px; margin-bottom:24px; }
-        .bar { width:3px; height:3px; border-radius:2px; background:var(--accent); }
-        .playing .bar:nth-child(1){animation:wave 0.9s ease-in-out infinite 0.00s}
-        .playing .bar:nth-child(2){animation:wave 0.9s ease-in-out infinite 0.08s}
-        .playing .bar:nth-child(3){animation:wave 0.9s ease-in-out infinite 0.16s}
-        .playing .bar:nth-child(4){animation:wave 0.9s ease-in-out infinite 0.24s}
-        .playing .bar:nth-child(5){animation:wave 0.9s ease-in-out infinite 0.32s}
-        .playing .bar:nth-child(6){animation:wave 0.9s ease-in-out infinite 0.40s}
-        .playing .bar:nth-child(7){animation:wave 0.9s ease-in-out infinite 0.32s}
-        .playing .bar:nth-child(8){animation:wave 0.9s ease-in-out infinite 0.24s}
-        .playing .bar:nth-child(9){animation:wave 0.9s ease-in-out infinite 0.16s}
-        .playing .bar:nth-child(10){animation:wave 0.9s ease-in-out infinite 0.08s}
-        .playing .bar:nth-child(11){animation:wave 0.9s ease-in-out infinite 0.00s}
-        .playing .bar:nth-child(12){animation:wave 0.9s ease-in-out infinite 0.08s}
-        @keyframes wave { 0%,100%{height:3px} 50%{height:22px} }
-        .controls { display:flex; align-items:center; justify-content:center; }
-        .btn-play { width:72px; height:72px; border-radius:50%; border:none; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.2s,box-shadow 0.2s; box-shadow:0 8px 24px rgba(61,127,255,0.4); -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; -webkit-user-select:none; }
-        .btn-play:active { transform:scale(0.92); }
-        @media(hover:hover){ .btn-play:not(.offline):not(.loading):hover { transform:scale(1.07); box-shadow:0 12px 32px rgba(61,127,255,0.55); } }
-        .btn-play.offline { background:var(--dim); box-shadow:none; cursor:default; opacity:0.4; }
-        .btn-play.loading { animation:pulse-btn 1s ease-in-out infinite; }
-        @keyframes pulse-btn { 0%,100%{opacity:1} 50%{opacity:0.55} }
-        .spin-icon { animation:spin 1s linear infinite; }
-        .volume-wrap { display:flex; align-items:center; gap:8px; margin-top:20px; padding-top:20px; border-top:1px solid var(--border); }
-        .vol-icon { color:var(--muted); flex-shrink:0; }
-        input[type=range] { -webkit-appearance:none; appearance:none; flex:1; height:6px; background:var(--dim); border-radius:99px; outline:none; cursor:pointer; touch-action:pan-x; }
-        input[type=range]::-webkit-slider-runnable-track { height:6px; border-radius:99px; background:var(--dim); }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:26px; height:26px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 0 8px rgba(61,127,255,0.5); margin-top:-10px; }
-        input[type=range]::-moz-range-thumb { width:26px; height:26px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); }
-        .vol-label { font-size:11px; color:var(--muted); min-width:32px; text-align:right; }
-        .footer { margin-top:20px; display:flex; justify-content:center; }
-        .listener-pill { font-size:11px; color:var(--muted); background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:4px 12px; border-radius:99px; }
-        audio { display:none; }
+
+        .song-status-text {
+            font-size: 12px; color: var(--muted); letter-spacing: 0.5px;
+        }
+
+        /* ── VOLUME BAR ── */
+        .vol-bar {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            padding: 10px 20px;
+        }
+        .vol-icon { color: var(--muted); }
+        input[type=range] {
+            -webkit-appearance: none; appearance: none;
+            width: 160px; height: 4px;
+            background: rgba(255,255,255,0.08); border-radius: 99px;
+            outline: none; cursor: pointer; touch-action: pan-x;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+            background: var(--accent); border: 2px solid rgba(5,8,16,0.8);
+            box-shadow: 0 0 6px rgba(61,127,255,0.5); margin-top: -7px;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--accent); border: 2px solid rgba(5,8,16,0.8);
+        }
+        .vol-label { font-size: 12px; color: var(--muted); min-width: 36px; text-align: right; font-weight: 600; }
+
+        /* ── BOTTOM BAR ── */
+        .bottombar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px 28px;
+            border-top: 1px solid var(--border);
+            background: rgba(5,8,16,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        }
+        .listener-pill {
+            font-size: 12px; color: var(--muted);
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 6px 16px; border-radius: 99px; letter-spacing: 0.5px;
+        }
+
+        audio { display: none; }
     </style>
 </head>
 <body>
-<div class="glow-1"></div>
-<div class="glow-2"></div>
-<div class="card">
-    <div class="topbar">
-        <span class="station-name">Radyo</span>
-        <div class="live-badge offline" id="liveBadge">
-            <div class="live-dot"></div>
-            <span id="liveText">Offline</span>
+<div class="bg-blur"></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="logo">
+        <div class="logo-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3a9 9 0 0 1 9 9 9 9 0 0 1-9 9A9 9 0 0 1 3 12 9 9 0 0 1 12 3zm0 4a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>
+            </svg>
         </div>
+        <span class="logo-text">MEHMET <span>SAM</span></span>
     </div>
-    <div class="vinyl-wrap" id="vinylWrap">
-        <div class="vinyl-ring"></div>
-        <div class="vinyl"></div>
+    <div class="status-pill" id="liveBadge">
+        <div class="status-dot"></div>
+        <span id="liveText">Offline</span>
     </div>
-    <div class="song-info">
-        <div class="song-title" id="songTitle">—</div>
-        <div class="song-status" id="songStatus">Bağlanılıyor...</div>
-    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
     <div class="visualizer" id="visualizer">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
     </div>
-    <div class="controls">
+
+    <div class="song-hint" id="songHint">
+        <svg class="song-hint-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span id="songStatus">Bağlanılıyor...</span>
+    </div>
+
+    <div class="song-title" id="songTitle">—</div>
+    <div class="station-label">MEHMET SAM RADYO</div>
+
+    <div class="controls-row">
         <button class="btn-play offline" id="playBtn" aria-label="Oynat">
-            <svg id="icoPlay" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-            <svg id="icoPause" style="display:none" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-            <svg id="icoLoad" style="display:none" class="spin-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <svg id="icoPlay" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            <svg id="icoPause" style="display:none" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            <svg id="icoLoad" style="display:none" class="spin-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                 <path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/>
                 <path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>
             </svg>
         </button>
+
+        <div class="vol-bar">
+            <svg class="vol-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+            <input type="range" id="volSlider" min="0" max="100" value="80">
+            <span class="vol-label" id="volLabel">80%</span>
+        </div>
     </div>
-    <div class="volume-wrap">
-        <svg class="vol-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-        </svg>
-        <input type="range" id="volSlider" min="0" max="100" value="80">
-        <span class="vol-label" id="volLabel">80%</span>
-    </div>
-    <div class="footer">
-        <div class="listener-pill" id="footerInfo">Yayın bekleniyor</div>
-    </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottombar">
+    <div class="listener-pill" id="footerInfo">Yayın bekleniyor</div>
 </div>
 
 <audio id="audio" preload="none" playsinline webkit-playsinline x-webkit-airplay="allow"></audio>
@@ -162,9 +284,9 @@
     const icoPlay    = document.getElementById('icoPlay');
     const icoPause   = document.getElementById('icoPause');
     const icoLoad    = document.getElementById('icoLoad');
-    const vinylWrap  = document.getElementById('vinylWrap');
     const visualizer = document.getElementById('visualizer');
     const songTitle  = document.getElementById('songTitle');
+    const songHint   = document.getElementById('songHint');
     const songStatus = document.getElementById('songStatus');
     const liveBadge  = document.getElementById('liveBadge');
     const liveText   = document.getElementById('liveText');
@@ -194,10 +316,9 @@
         volLabel.textContent = volSlider.value + '%';
     }
     volSlider.addEventListener('input', updateVolume);
-    volSlider.addEventListener('change', updateVolume);        // iOS Safari için
-    volSlider.addEventListener('touchmove', updateVolume, { passive: true }); // iOS touch için
+    volSlider.addEventListener('change', updateVolume);
+    volSlider.addEventListener('touchmove', updateVolume, { passive: true });
 
-    /* ── UI ── */
     function showIcon(n) {
         icoPlay.style.display  = n==='play'  ? '' : 'none';
         icoPause.style.display = n==='pause' ? '' : 'none';
@@ -208,14 +329,13 @@
         const playing = s === ST.PLAYING;
         const loading = s === ST.LOADING;
         showIcon(loading ? 'load' : playing ? 'pause' : 'play');
-        vinylWrap.classList.toggle('spinning', playing);
         visualizer.classList.toggle('playing', playing);
         playBtn.classList.toggle('loading', loading);
     }
     function setBroadcast(on) {
         isBroadcasting = on;
-        liveBadge.classList.toggle('offline', !on);
-        liveText.textContent = on ? 'CANLI' : 'Offline';
+        liveBadge.classList.toggle('live', on);
+        liveText.textContent = on ? 'BAĞLANDI' : 'Offline';
         playBtn.classList.toggle('offline', !on);
         playBtn.style.opacity = on ? '' : '0.4';
     }
@@ -226,13 +346,6 @@
     }
     function setStatus(t) { songStatus.textContent = t; }
 
-    /* ── MSE tabanlı stream (ngrok uyarısını bypass eder) ── */
-    /*
-     * Tarayıcıda <audio src="ngrok_url"> yerine fetch() ile stream alıyoruz.
-     * fetch(), ngrok-skip-browser-warning header'ını gönderebilir.
-     * Gelen binary veriyi MediaSource API ile audio'ya besliyoruz.
-     * Bu sayede ngrok uyarı sayfası HİÇ görünmüyor.
-     */
     function stopMSE() {
         if (fetchAbort) { fetchAbort.abort(); fetchAbort = null; }
         fetchReader = null;
@@ -250,9 +363,7 @@
         setState(ST.LOADING);
         setStatus('Bağlanıyor...');
 
-        // MediaSource desteği var mı? (tüm modern tarayıcılarda var)
         if (!window.MediaSource) {
-            // Fallback: direkt src (eski tarayıcılar için)
             startDirect();
             return;
         }
@@ -265,7 +376,6 @@
             try {
                 sourceBuffer = mse.addSourceBuffer('audio/mpeg');
             } catch(e) {
-                // audio/mpeg desteklenmiyorsa direkt yönteme geç
                 stopMSE();
                 startDirect();
                 return;
@@ -308,7 +418,6 @@
             while (true) {
                 const { done, value } = await fetchReader.read();
                 if (done) {
-                    // ffmpeg stream bitti ama yayın devam ediyorsa yeniden bağlan
                     if (userWantsPlay && isBroadcasting) {
                         retryCount = 0;
                         setTimeout(startMSE, 1000);
@@ -319,7 +428,6 @@
                     break;
                 }
 
-                // sourceBuffer meşgulse bekle
                 if (sourceBuffer.updating) {
                     await new Promise(r => sourceBuffer.addEventListener('updateend', r, { once: true }));
                 }
@@ -329,7 +437,6 @@
                 try {
                     sourceBuffer.appendBuffer(value);
                 } catch(e) {
-                    // QuotaExceededError: eski buffer'ları temizle
                     if (e.name === 'QuotaExceededError' && sourceBuffer.buffered.length > 0) {
                         const start = sourceBuffer.buffered.start(0);
                         const end   = audio.currentTime - 5;
@@ -347,7 +454,6 @@
         }
     }
 
-    /* Fallback: direkt audio src (MSE desteklenmiyorsa) */
     function startDirect() {
         audio.src = API_STREAM + '/stream?t=' + Date.now();
         audio.volume = volume;
@@ -378,7 +484,6 @@
         retryCount = 0;
     }
 
-    /* ── Buton ── */
     let lastTap = 0;
     function handleInteract(e) {
         e.preventDefault();
@@ -398,7 +503,6 @@
     playBtn.addEventListener('click', handleInteract);
     playBtn.addEventListener('touchend', handleInteract, { passive: false });
 
-    /* ── Audio event'leri ── */
     audio.addEventListener('playing', () => {
         clearTimeout(retryTimer);
         retryCount = 0;
@@ -422,7 +526,6 @@
         }
     });
 
-    /* ── Durum sorgulama ── */
     async function checkStatus() {
         try {
             const ctrl = new AbortController();
@@ -472,7 +575,6 @@
         }
     }
 
-    /* ── Sayfa görünürlüğü ── */
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) return;
         checkStatus();
