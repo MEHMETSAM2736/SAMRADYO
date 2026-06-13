@@ -212,17 +212,31 @@ function killSlot(s) {
     s.mse = null; s.sb = null;
 }
 
+// Mobil/iOS tespiti — bu cihazlarda MSE yerine native audio çok daha stabil
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const useMSE   = !isMobile && window.MediaSource && MediaSource.isTypeSupported('audio/mpeg');
+
 // ── Open a slot's stream connection
 function openSlot(s, onReady) {
     killSlot(s);
-    if (!window.MediaSource || !MediaSource.isTypeSupported('audio/mpeg')) {
-        // Fallback: direkt <audio src>
+    if (!useMSE) {
+        // Mobil / MSE desteksiz: direkt native <audio src> — en stabil yol
         s.audio = new Audio();
         s.audio.volume = (s.id === activeSlot) ? vol : 0;
         s.audio.src = STREAM_URL + '?t=' + Date.now();
         s.audio.preload = 'auto';
+        // iOS için kritik
+        s.audio.setAttribute('playsinline', '');
+        s.audio.setAttribute('webkit-playsinline', '');
         s.alive = true;
         s.audio.addEventListener('playing', () => { s.ready = true; if (onReady) onReady(s); }, { once: true });
+        s.audio.addEventListener('waiting', () => {
+            // Mobilde waiting → 1sn bekle, hala duruyorsa yeniden bağlan
+            setTimeout(() => {
+                if (s.audio && s.audio.readyState < 3 && wantsPlay && broadcasting) handleSlotError(s);
+            }, 1000);
+        });
+        s.audio.addEventListener('stalled', () => { if (wantsPlay) handleSlotError(s); });
         s.audio.addEventListener('error',   () => { if (wantsPlay) handleSlotError(s); });
         s.audio.play().catch(() => {});
         return;
