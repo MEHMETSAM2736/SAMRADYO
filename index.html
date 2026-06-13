@@ -9,151 +9,71 @@
     <title>Mehmet Sam Radyo</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg: #060810; --accent: #2d6fff; --accent2: #6b2dff;
-            --text: #e8edf5; --muted: #4a5568; --dim: #111827;
-            --surface: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.07);
-        }
-        html, body { height: 100%; width: 100%; -webkit-text-size-adjust: 100%; }
-        body {
-            font-family: 'Space Grotesk', sans-serif;
-            background: var(--bg); color: var(--text);
-            min-height: 100vh; display: flex; flex-direction: column;
-            overflow: hidden; -webkit-font-smoothing: antialiased;
-        }
-        .ambient {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background:
-                radial-gradient(ellipse 60% 50% at 50% -10%, rgba(45,111,255,0.18) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 40% at 80% 80%, rgba(107,45,255,0.10) 0%, transparent 60%);
-            transition: opacity 1.2s;
-        }
-        .ambient.dim { opacity: 0.25; }
-        .grid {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background-image: linear-gradient(rgba(45,111,255,0.025) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(45,111,255,0.025) 1px, transparent 1px);
-            background-size: 48px 48px;
-        }
-        .topbar {
-            position: relative; z-index: 10;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 20px 32px;
-        }
-        .logo { display: flex; align-items: center; gap: 10px; }
-        .logo-icon {
-            width: 34px; height: 34px; border-radius: 8px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .logo-text { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
-        .logo-text span { color: var(--accent); }
-        .status-pill {
-            display: flex; align-items: center; gap: 7px;
-            background: var(--surface); border: 1px solid var(--border);
-            padding: 6px 14px; border-radius: 99px;
-            font-size: 12px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;
-            color: var(--muted); transition: all 0.4s;
-        }
-        .status-pill.live { background: rgba(45,111,255,0.1); border-color: rgba(45,111,255,0.3); color: #7aabff; }
-        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-        .status-pill.live .status-dot { animation: blink 1.4s ease-in-out infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
-        .main {
-            position: relative; z-index: 5; flex: 1;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px 24px;
-        }
-        .visualizer {
-            display: flex; align-items: flex-end; justify-content: center;
-            gap: 4px; height: 48px; margin-bottom: 28px;
-        }
-        .bar {
-            width: 4px; border-radius: 3px;
-            background: linear-gradient(to top, var(--accent), var(--accent2));
-            height: 4px; opacity: 0.4; transition: opacity 0.4s;
-        }
-        .visualizer.playing .bar { opacity: 1; }
-        .visualizer.playing .bar:nth-child(1)  { animation: wave .85s ease-in-out infinite 0.00s }
-        .visualizer.playing .bar:nth-child(2)  { animation: wave .85s ease-in-out infinite 0.07s }
-        .visualizer.playing .bar:nth-child(3)  { animation: wave .85s ease-in-out infinite 0.14s }
-        .visualizer.playing .bar:nth-child(4)  { animation: wave .85s ease-in-out infinite 0.21s }
-        .visualizer.playing .bar:nth-child(5)  { animation: wave .85s ease-in-out infinite 0.28s }
-        .visualizer.playing .bar:nth-child(6)  { animation: wave .85s ease-in-out infinite 0.35s }
-        .visualizer.playing .bar:nth-child(7)  { animation: wave .85s ease-in-out infinite 0.42s }
-        .visualizer.playing .bar:nth-child(8)  { animation: wave .85s ease-in-out infinite 0.35s }
-        .visualizer.playing .bar:nth-child(9)  { animation: wave .85s ease-in-out infinite 0.28s }
-        .visualizer.playing .bar:nth-child(10) { animation: wave .85s ease-in-out infinite 0.21s }
-        .visualizer.playing .bar:nth-child(11) { animation: wave .85s ease-in-out infinite 0.14s }
-        .visualizer.playing .bar:nth-child(12) { animation: wave .85s ease-in-out infinite 0.07s }
-        .visualizer.playing .bar:nth-child(13) { animation: wave .85s ease-in-out infinite 0.00s }
-        @keyframes wave { 0%,100%{height:4px} 50%{height:38px} }
-        .hint {
-            font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
-            color: var(--accent); margin-bottom: 18px; opacity: 0; transition: opacity 0.5s;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .hint.visible { opacity: 1; }
-        .song-title {
-            font-size: clamp(28px, 5vw, 52px); font-weight: 800;
-            line-height: 1.1; text-align: center; letter-spacing: -0.02em;
-            max-width: 820px; transition: opacity 0.3s; margin-bottom: 14px; word-break: break-word;
-        }
-        .station-label {
-            font-size: 12px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase;
-            color: var(--muted); margin-bottom: 40px;
-        }
-        .btn-play {
-            width: 68px; height: 68px; border-radius: 50%; border: none; cursor: pointer;
-            background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white;
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.18s, box-shadow 0.18s, opacity 0.3s;
-            box-shadow: 0 8px 32px rgba(45,111,255,0.45);
-            -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-            user-select: none; -webkit-user-select: none; margin-bottom: 36px;
-        }
-        .btn-play:active { transform: scale(0.91); }
-        @media(hover:hover){ .btn-play:not(.offline):not(.loading):hover { transform:scale(1.08); box-shadow:0 14px 42px rgba(45,111,255,0.6); } }
-        .btn-play.offline { background: var(--dim); box-shadow: none; opacity: 0.35; cursor: default; }
-        .btn-play.loading { animation: pulse-btn 1s ease-in-out infinite; }
-        @keyframes pulse-btn { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        .spin-icon { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .volume-row { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 340px; }
-        .vol-icon { color: var(--muted); flex-shrink: 0; }
-        input[type=range] {
-            -webkit-appearance: none; appearance: none; flex: 1; height: 5px;
-            background: var(--dim); border-radius: 99px; outline: none; cursor: pointer; touch-action: pan-x;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none; width: 22px; height: 22px;
-            border-radius: 50%; background: var(--accent); border: 2px solid var(--bg);
-            box-shadow: 0 0 10px rgba(45,111,255,0.55); margin-top: -8.5px;
-        }
-        input[type=range]::-moz-range-thumb {
-            width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg);
-        }
-        .vol-label { font-size: 11px; color: var(--muted); min-width: 34px; text-align: right; }
-        .footer { position: relative; z-index: 10; display: flex; justify-content: center; padding: 16px 24px 24px; }
-        .listener-pill {
-            font-size: 12px; color: var(--muted); background: var(--surface);
-            border: 1px solid var(--border); padding: 6px 16px; border-radius: 99px;
-        }
-        audio { display: none; }
-        @media (max-width: 480px) { .topbar { padding: 16px 20px; } }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#060810;--accent:#2d6fff;--accent2:#6b2dff;--text:#e8edf5;--muted:#4a5568;--dim:#111827;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.07)}
+        html,body{height:100%;width:100%;-webkit-text-size-adjust:100%}
+        body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
+        .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 50% -10%,rgba(45,111,255,0.18) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 80% 80%,rgba(107,45,255,0.10) 0%,transparent 60%);transition:opacity 1.2s}
+        .ambient.dim{opacity:0.25}
+        .grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(45,111,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(45,111,255,0.025) 1px,transparent 1px);background-size:48px 48px}
+        .topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:20px 32px}
+        .logo{display:flex;align-items:center;gap:10px}
+        .logo-icon{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .logo-text{font-size:15px;font-weight:700;letter-spacing:.02em}
+        .logo-text span{color:var(--accent)}
+        .status-pill{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);transition:all .4s}
+        .status-pill.live{background:rgba(45,111,255,0.1);border-color:rgba(45,111,255,0.3);color:#7aabff}
+        .status-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+        .status-pill.live .status-dot{animation:blink 1.4s ease-in-out infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+        .main{position:relative;z-index:5;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px}
+        .visualizer{display:flex;align-items:flex-end;justify-content:center;gap:4px;height:48px;margin-bottom:28px}
+        .bar{width:4px;border-radius:3px;background:linear-gradient(to top,var(--accent),var(--accent2));height:4px;opacity:.4;transition:opacity .4s}
+        .visualizer.playing .bar{opacity:1}
+        .visualizer.playing .bar:nth-child(1){animation:wave .85s ease-in-out infinite 0.00s}
+        .visualizer.playing .bar:nth-child(2){animation:wave .85s ease-in-out infinite 0.07s}
+        .visualizer.playing .bar:nth-child(3){animation:wave .85s ease-in-out infinite 0.14s}
+        .visualizer.playing .bar:nth-child(4){animation:wave .85s ease-in-out infinite 0.21s}
+        .visualizer.playing .bar:nth-child(5){animation:wave .85s ease-in-out infinite 0.28s}
+        .visualizer.playing .bar:nth-child(6){animation:wave .85s ease-in-out infinite 0.35s}
+        .visualizer.playing .bar:nth-child(7){animation:wave .85s ease-in-out infinite 0.42s}
+        .visualizer.playing .bar:nth-child(8){animation:wave .85s ease-in-out infinite 0.35s}
+        .visualizer.playing .bar:nth-child(9){animation:wave .85s ease-in-out infinite 0.28s}
+        .visualizer.playing .bar:nth-child(10){animation:wave .85s ease-in-out infinite 0.21s}
+        .visualizer.playing .bar:nth-child(11){animation:wave .85s ease-in-out infinite 0.14s}
+        .visualizer.playing .bar:nth-child(12){animation:wave .85s ease-in-out infinite 0.07s}
+        .visualizer.playing .bar:nth-child(13){animation:wave .85s ease-in-out infinite 0.00s}
+        @keyframes wave{0%,100%{height:4px}50%{height:38px}}
+        .hint{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:18px;opacity:0;transition:opacity .5s;display:flex;align-items:center;gap:6px}
+        .hint.visible{opacity:1}
+        .song-title{font-size:clamp(28px,5vw,52px);font-weight:800;line-height:1.1;text-align:center;letter-spacing:-.02em;max-width:820px;transition:opacity .3s;margin-bottom:14px;word-break:break-word}
+        .station-label{font-size:12px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:40px}
+        .btn-play{width:68px;height:68px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;display:flex;align-items:center;justify-content:center;transition:transform .18s,box-shadow .18s,opacity .3s;box-shadow:0 8px 32px rgba(45,111,255,0.45);-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;margin-bottom:36px}
+        .btn-play:active{transform:scale(.91)}
+        @media(hover:hover){.btn-play:not(.offline):not(.loading):hover{transform:scale(1.08);box-shadow:0 14px 42px rgba(45,111,255,.6)}}
+        .btn-play.offline{background:var(--dim);box-shadow:none;opacity:.35;cursor:default}
+        .btn-play.loading{animation:pulse-btn 1s ease-in-out infinite}
+        @keyframes pulse-btn{0%,100%{opacity:1}50%{opacity:.5}}
+        .spin-icon{animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .volume-row{display:flex;align-items:center;gap:12px;width:100%;max-width:340px}
+        .vol-icon{color:var(--muted);flex-shrink:0}
+        input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:5px;background:var(--dim);border-radius:99px;outline:none;cursor:pointer;touch-action:pan-x}
+        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 10px rgba(45,111,255,.55);margin-top:-8.5px}
+        input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
+        .vol-label{font-size:11px;color:var(--muted);min-width:34px;text-align:right}
+        .footer{position:relative;z-index:10;display:flex;justify-content:center;padding:16px 24px 24px}
+        .listener-pill{font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:6px 16px;border-radius:99px}
+        audio{display:none}
     </style>
 </head>
 <body>
 <div class="ambient" id="ambient"></div>
 <div class="grid"></div>
-
 <div class="topbar">
     <div class="logo">
         <div class="logo-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-                <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
         </div>
         <div class="logo-text">MEHMET <span>SAM</span></div>
     </div>
@@ -162,14 +82,11 @@
         <span id="pillText">Bağlanıyor</span>
     </div>
 </div>
-
 <div class="main">
     <div class="visualizer" id="visualizer">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        <div class="bar"></div>
     </div>
     <div class="hint" id="hint"><span>▶</span><span>Butona Basarak Başlat</span></div>
     <div class="song-title" id="songTitle">—</div>
@@ -178,337 +95,394 @@
         <svg id="icoPlay" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
         <svg id="icoPause" style="display:none" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         <svg id="icoLoad" style="display:none" class="spin-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/>
-            <path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>
+            <path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>
         </svg>
     </button>
     <div class="volume-row">
-        <svg class="vol-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-        </svg>
+        <svg class="vol-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
         <input type="range" id="volSlider" min="0" max="100" value="80">
         <span class="vol-label" id="volLabel">80%</span>
     </div>
 </div>
-
-<div class="footer">
-    <div class="listener-pill" id="footerInfo">Yayın bekleniyor</div>
-</div>
-
-<audio id="audio" preload="none" playsinline webkit-playsinline></audio>
+<div class="footer"><div class="listener-pill" id="footerInfo">Yayın bekleniyor</div></div>
 
 <script>
 (() => {
-    'use strict';
+'use strict';
 
-    const API        = 'https://yo-yo-backing-paralyze.ngrok-free.dev';
-    const STREAM_URL = 'https://radyo-proxy.gower45651.workers.dev/stream';
-    const POLL_MS    = 3000;
+const STATUS_URL = 'https://yo-yo-backing-paralyze.ngrok-free.dev/status';
+const STREAM_URL = 'https://radyo-proxy.gower45651.workers.dev/stream';
+const POLL_MS    = 3000;
+const HDRS       = { 'ngrok-skip-browser-warning': '1', 'Cache-Control': 'no-cache' };
 
-    const HDRS = { 'ngrok-skip-browser-warning': '1', 'Cache-Control': 'no-cache' };
+// ── DOM
+const $pill      = document.getElementById('statusPill');
+const $pillTxt   = document.getElementById('pillText');
+const $playBtn   = document.getElementById('playBtn');
+const $icoPlay   = document.getElementById('icoPlay');
+const $icoPause  = document.getElementById('icoPause');
+const $icoLoad   = document.getElementById('icoLoad');
+const $viz       = document.getElementById('visualizer');
+const $title     = document.getElementById('songTitle');
+const $footer    = document.getElementById('footerInfo');
+const $vol       = document.getElementById('volSlider');
+const $volLbl    = document.getElementById('volLabel');
+const $hint      = document.getElementById('hint');
+const $ambient   = document.getElementById('ambient');
 
-    // ─── DOM
-    const audio      = document.getElementById('audio');
-    const playBtn    = document.getElementById('playBtn');
-    const icoPlay    = document.getElementById('icoPlay');
-    const icoPause   = document.getElementById('icoPause');
-    const icoLoad    = document.getElementById('icoLoad');
-    const visualizer = document.getElementById('visualizer');
-    const songTitle  = document.getElementById('songTitle');
-    const statusPill = document.getElementById('statusPill');
-    const pillText   = document.getElementById('pillText');
-    const footerInfo = document.getElementById('footerInfo');
-    const volSlider  = document.getElementById('volSlider');
-    const volLabel   = document.getElementById('volLabel');
-    const hint       = document.getElementById('hint');
-    const ambient    = document.getElementById('ambient');
+// ── App state
+let broadcasting = false;
+let wantsPlay    = false;
+let playing      = false;
+let loading      = false;
+let currentSong  = '';
+let currentStart = 0;
+let vol          = 0.8;
 
-    // ─── State
-    const ST = { IDLE: 0, LOADING: 1, PLAYING: 2 };
-    let st             = ST.IDLE;
-    let broadcasting   = false;
-    let wantsPlay      = false;
-    let currentSong    = '';
-    let currentStart   = 0;
-    let vol            = 0.8;
+// ── Dual-stream engine
+// A ve B olmak üzere iki bağımsız slot.
+// Her zaman birinde ses çalar, diğeri arka planda hazırlanır.
+// Aktif slotun bağlantısı koparsa → diğeri hemen devreye girer.
 
-    // MSE
-    let mse = null, sb = null, abortCtrl = null, reader = null;
+const SLOT_COUNT = 2;
+const slots = [makeSlot(0), makeSlot(1)];
+let activeSlot = 0;   // şu an ses çıkaran slot
+let standbySlot = 1;  // hazırlanan slot
 
-    // Retry
-    let retryTimer  = null;
-    let retryN      = 0;
-    const MAX_RETRY = 10;
-    // Üstel geri çekilme: 200ms, 400, 700, 1000, 1500, 2000, 3000, 4000, 5000, 6000
-    const DELAYS = [200, 400, 700, 1000, 1500, 2000, 3000, 4000, 5000, 6000];
+function makeSlot(id) {
+    return {
+        id,
+        audio:    null,   // Audio nesnesi
+        mse:      null,
+        sb:       null,
+        abort:    null,
+        reader:   null,
+        ready:    false,  // ilk chunk geldi mi
+        alive:    false,  // bağlantı açık mı
+        objUrl:   null,
+    };
+}
 
-    // ─── Volume
-    audio.volume = vol;
-    function applyVol() {
-        vol = volSlider.value / 100;
-        audio.volume = vol;
-        volLabel.textContent = volSlider.value + '%';
+// ── Volume
+function applyVol() {
+    vol = $vol.value / 100;
+    $volLbl.textContent = $vol.value + '%';
+    slots.forEach(s => { if (s.audio) s.audio.volume = (s.id === activeSlot) ? vol : 0; });
+}
+$vol.addEventListener('input',    applyVol);
+$vol.addEventListener('change',   applyVol);
+$vol.addEventListener('touchmove', applyVol, { passive: true });
+
+// ── UI
+function icon(n) {
+    $icoPlay.style.display  = n==='play'  ? '' : 'none';
+    $icoPause.style.display = n==='pause' ? '' : 'none';
+    $icoLoad.style.display  = n==='load'  ? '' : 'none';
+}
+function updateUI() {
+    icon(loading ? 'load' : playing ? 'pause' : 'play');
+    $viz.classList.toggle('playing', playing);
+    $playBtn.classList.toggle('loading', loading);
+    $ambient.classList.toggle('dim', !playing);
+    $hint.classList.toggle('visible', !playing && !loading && broadcasting);
+}
+function setBroadcast(on) {
+    broadcasting = on;
+    $pill.classList.toggle('live', on);
+    $pillTxt.textContent = on ? 'BAĞLANDI' : 'Offline';
+    $playBtn.classList.toggle('offline', !on);
+    $playBtn.style.opacity = on ? '' : '0.35';
+    updateUI();
+}
+function setTitle(t) {
+    if (t === $title.textContent) return;
+    $title.style.opacity = '0';
+    setTimeout(() => { $title.textContent = t; $title.style.opacity = '1'; }, 200);
+}
+
+// ── Slot teardown
+function killSlot(s) {
+    s.alive = false;
+    s.ready = false;
+    if (s.abort) { s.abort.abort(); s.abort = null; }
+    s.reader = null;
+    if (s.audio) { s.audio.pause(); s.audio.src = ''; s.audio = null; }
+    if (s.objUrl) { try { URL.revokeObjectURL(s.objUrl); } catch(_){} s.objUrl = null; }
+    if (s.mse && s.mse.readyState === 'open') { try { s.mse.endOfStream(); } catch(_){} }
+    s.mse = null; s.sb = null;
+}
+
+// ── Open a slot's stream connection
+function openSlot(s, onReady) {
+    killSlot(s);
+    if (!window.MediaSource || !MediaSource.isTypeSupported('audio/mpeg')) {
+        // Fallback: direkt <audio src>
+        s.audio = new Audio();
+        s.audio.volume = (s.id === activeSlot) ? vol : 0;
+        s.audio.src = STREAM_URL + '?t=' + Date.now();
+        s.audio.preload = 'auto';
+        s.alive = true;
+        s.audio.addEventListener('playing', () => { s.ready = true; if (onReady) onReady(s); }, { once: true });
+        s.audio.addEventListener('error',   () => { if (wantsPlay) handleSlotError(s); });
+        s.audio.play().catch(() => {});
+        return;
     }
-    volSlider.addEventListener('input', applyVol);
-    volSlider.addEventListener('change', applyVol);
-    volSlider.addEventListener('touchmove', applyVol, { passive: true });
 
-    // ─── UI helpers
-    function icon(n) {
-        icoPlay.style.display  = n === 'play'  ? '' : 'none';
-        icoPause.style.display = n === 'pause' ? '' : 'none';
-        icoLoad.style.display  = n === 'load'  ? '' : 'none';
-    }
-    function setSt(s) {
-        st = s;
-        const playing = s === ST.PLAYING, loading = s === ST.LOADING;
-        icon(loading ? 'load' : playing ? 'pause' : 'play');
-        visualizer.classList.toggle('playing', playing);
-        playBtn.classList.toggle('loading', loading);
-        ambient.classList.toggle('dim', !playing);
-        hint.classList.toggle('visible', s === ST.IDLE && broadcasting);
-    }
-    function setBroadcast(on) {
-        broadcasting = on;
-        statusPill.classList.toggle('live', on);
-        pillText.textContent = on ? 'BAĞLANDI' : 'Offline';
-        playBtn.classList.toggle('offline', !on);
-        playBtn.style.opacity = on ? '' : '0.35';
-        hint.classList.toggle('visible', on && st === ST.IDLE);
-    }
-    function setTitle(t) {
-        if (t === songTitle.textContent) return;
-        songTitle.style.opacity = '0';
-        setTimeout(() => { songTitle.textContent = t; songTitle.style.opacity = '1'; }, 200);
-    }
+    s.mse   = new MediaSource();
+    s.audio = new Audio();
+    s.audio.volume = (s.id === activeSlot) ? vol : 0;
+    s.objUrl = URL.createObjectURL(s.mse);
+    s.audio.src = s.objUrl;
+    s.alive = true;
 
-    // ─── CORE: MSE düşük-gecikme stream
-    // Strateji: fetch() ile binary akış al, MediaSource'a besle.
-    // Buffer hedefi: 3 saniye öncesi temizlenir → daima küçük buffer → düşük gecikme.
-    // Hata/kesinti → hemen yeniden bağlan (kullanıcı fark etmez).
+    s.mse.addEventListener('sourceopen', async () => {
+        try { s.sb = s.mse.addSourceBuffer('audio/mpeg'); }
+        catch(e) { handleSlotError(s); return; }
+        s.sb.mode = 'sequence';
 
-    function teardown() {
-        if (abortCtrl) { abortCtrl.abort(); abortCtrl = null; }
-        reader = null;
-        audio.pause();
-        try { if (audio.src) { URL.revokeObjectURL(audio.src); audio.src = ''; } } catch(e){}
-        if (mse && mse.readyState === 'open') { try { mse.endOfStream(); } catch(e){} }
-        mse = null; sb = null;
-    }
-
-    function connect() {
-        teardown();
-        setSt(ST.LOADING);
-
-        // MSE desteklenmiyor (eski Safari) → direkt src
-        if (!window.MediaSource || !MediaSource.isTypeSupported('audio/mpeg')) {
-            audio.src = STREAM_URL + '?t=' + Date.now();
-            audio.volume = vol;
-            audio.load();
-            audio.play().catch(() => scheduleRetry());
+        s.abort = new AbortController();
+        let res;
+        try {
+            res = await fetch(STREAM_URL + '?t=' + Date.now(), {
+                signal: s.abort.signal, headers: HDRS, cache: 'no-store'
+            });
+        } catch(e) {
+            if (e.name !== 'AbortError') handleSlotError(s);
             return;
         }
+        if (!res.ok) { handleSlotError(s); return; }
 
-        mse = new MediaSource();
-        const objectUrl = URL.createObjectURL(mse);
-        audio.src = objectUrl;
-        audio.volume = vol;
+        s.reader = res.body.getReader();
+        pumpSlot(s, onReady);
+    }, { once: true });
 
-        mse.addEventListener('sourceopen', () => {
-            URL.revokeObjectURL(objectUrl);
-            try { sb = mse.addSourceBuffer('audio/mpeg'); }
-            catch(e) { teardown(); audio.src = STREAM_URL + '?t=' + Date.now(); audio.play().catch(()=>{}); return; }
-
-            sb.mode = 'sequence';
-            sb.addEventListener('error', () => scheduleRetry());
-
-            abortCtrl = new AbortController();
-
-            fetch(STREAM_URL + '?t=' + Date.now(), {
-                signal: abortCtrl.signal,
-                headers: HDRS,
-                // Tarayıcıya önbellek yapma, direkt akış al
-                cache: 'no-store'
-            }).then(async res => {
-                if (!res.ok) { scheduleRetry(); return; }
-                reader = res.body.getReader();
-                await pump();
-            }).catch(e => {
-                if (e.name !== 'AbortError') scheduleRetry();
-            });
-        }, { once: true });
-
-        // Audio oynatmayı başlat (MSE buffer dolunca ses çıkar)
-        audio.play().catch(() => {});
+    // Aktif slot ise oynat, standby ise beklet (sadece buffer doldur)
+    if (s.id === activeSlot) {
+        s.audio.play().catch(() => {});
     }
+}
 
-    async function pump() {
-        // Async döngü: chunk oku → sourceBuffer'a ekle → tekrar et
-        try {
-            while (true) {
-                if (!reader || !sb || !mse || mse.readyState !== 'open') break;
-
-                const { done, value } = await reader.read();
-
-                if (done) {
-                    // Stream kapandı; yayın devam ediyorsa anında yeniden bağlan
-                    if (wantsPlay && broadcasting) { retryN = 0; connect(); }
-                    else { setSt(ST.IDLE); }
-                    return;
-                }
-
-                // SourceBuffer meşgulse bekle (bu await kullanıcıya hiç belli olmaz)
-                if (sb.updating) {
-                    await new Promise(r => sb.addEventListener('updateend', r, { once: true }));
-                }
-                if (!sb || !mse || mse.readyState !== 'open') break;
-
-                try {
-                    sb.appendBuffer(value);
-                } catch(e) {
-                    if (e.name === 'QuotaExceededError') {
-                        // Buffer doldu: agresif temizle
-                        await flushOld(true);
-                        if (sb && mse && mse.readyState === 'open' && !sb.updating) {
-                            try { sb.appendBuffer(value); } catch(_){}
-                        }
+async function pumpSlot(s, onReady) {
+    let chunkN = 0;
+    try {
+        while (true) {
+            if (!s.alive || !s.sb || !s.mse || s.mse.readyState !== 'open') break;
+            const { done, value } = await s.reader.read();
+            if (done) {
+                // Stream bitti → hemen yeniden aç
+                if (wantsPlay && broadcasting) {
+                    if (s.id === activeSlot) {
+                        // Aktif slot kapandı → standby'ı devreye al
+                        switchToStandby();
+                    } else {
+                        // Standby kapandı → yeniden aç
+                        setTimeout(() => { if (wantsPlay && broadcasting) openSlot(s, null); }, 300);
                     }
-                    // Diğer hatalar: devam et
                 }
-
-                // Her chunk sonrası eski buffer'ı temizle (3 sn öncesi)
-                // Bu sayede gecikme birikmiyor
-                if (!sb.updating) flushOld(false);
+                return;
             }
-        } catch(e) {
-            if (e.name === 'AbortError') return;
-            if (wantsPlay && broadcasting) scheduleRetry();
-            else setSt(ST.IDLE);
-        }
-    }
 
-    function flushOld(force) {
-        if (!sb || sb.updating || !mse || mse.readyState !== 'open') return;
-        if (!sb.buffered.length) return;
-        const bufStart = sb.buffered.start(0);
-        const ct       = audio.currentTime;
-        // Normal: 3 saniye öncesini sil. Force: mevcut konumdan 1 sn öncesini sil.
-        const cutPoint = force ? ct - 1 : ct - 3;
-        if (cutPoint > bufStart + 0.5) {
-            try { sb.remove(bufStart, cutPoint); } catch(_){}
-        }
-    }
-
-    function scheduleRetry() {
-        if (!wantsPlay || !broadcasting) { setSt(ST.IDLE); return; }
-        if (retryN >= MAX_RETRY) {
-            // Max retry → sıfırla ve tekrar dene (sonsuz döngü değil, kullanıcı durdurana kadar)
-            retryN = 0;
-        }
-        const delay = DELAYS[Math.min(retryN, DELAYS.length - 1)];
-        retryN++;
-        clearTimeout(retryTimer);
-        retryTimer = setTimeout(connect, delay);
-    }
-
-    function stop() {
-        wantsPlay = false;
-        clearTimeout(retryTimer);
-        teardown();
-        setSt(ST.IDLE);
-        retryN = 0;
-    }
-
-    // ─── Audio events
-    audio.addEventListener('playing', () => {
-        clearTimeout(retryTimer);
-        retryN = 0;
-        setSt(ST.PLAYING);
-    });
-
-    // waiting / stalled: sessizce yeniden bağlan, kullanıcıya gösterme
-    function onStall() {
-        if (!wantsPlay || !broadcasting) return;
-        // 800ms içinde toparlanmazsa yeniden bağlan
-        clearTimeout(retryTimer);
-        retryTimer = setTimeout(() => {
-            if (wantsPlay && broadcasting && audio.readyState < 3) {
-                retryN = 0;
-                connect();
+            if (s.sb.updating) {
+                await new Promise(r => s.sb.addEventListener('updateend', r, { once: true }));
             }
-        }, 800);
-    }
-    audio.addEventListener('waiting', onStall);
-    audio.addEventListener('stalled', onStall);
-    audio.addEventListener('error',   () => { if (wantsPlay) { retryN = 0; scheduleRetry(); } });
-    audio.addEventListener('ended',   () => { if (wantsPlay && broadcasting) { retryN = 0; connect(); } else setSt(ST.IDLE); });
+            if (!s.alive || !s.sb || !s.mse || s.mse.readyState !== 'open') break;
 
-    // ─── Buton
-    let lastTap = 0;
-    function handleInteract(e) {
-        e.preventDefault(); e.stopPropagation();
-        const now = Date.now();
-        if (now - lastTap < 300) return;
-        lastTap = now;
-        if (!broadcasting) return;
-        if (st === ST.PLAYING || st === ST.LOADING) {
-            stop();
+            try { s.sb.appendBuffer(value); }
+            catch(e) {
+                if (e.name === 'QuotaExceededError') { await trimSlot(s, true); try { s.sb.appendBuffer(value); } catch(_){} }
+            }
+
+            chunkN++;
+
+            // İlk 3 chunk → slot hazır
+            if (chunkN === 3 && !s.ready) {
+                s.ready = true;
+                if (onReady) onReady(s);
+                // Standby slot ise ses sıfırda tut ama oynatmayı başlat (buffer için)
+                if (s.id === standbySlot && s.audio && s.audio.paused) {
+                    s.audio.volume = 0;
+                    s.audio.play().catch(() => {});
+                }
+            }
+
+            // Aktif slot: buffer'ı 4 sn'de tut (düşük gecikme)
+            if (s.id === activeSlot && !s.sb.updating) trimSlot(s, false);
+        }
+    } catch(e) {
+        if (e.name === 'AbortError') return;
+        if (wantsPlay && broadcasting) handleSlotError(s);
+    }
+}
+
+async function trimSlot(s, force) {
+    if (!s.sb || s.sb.updating || !s.mse || s.mse.readyState !== 'open') return;
+    if (!s.sb.buffered.length) return;
+    const start = s.sb.buffered.start(0);
+    const ct    = s.audio ? s.audio.currentTime : 0;
+    const cut   = force ? ct - 1 : ct - 4;
+    if (cut > start + 0.5) {
+        try { s.sb.remove(start, cut); }
+        catch(_){}
+    }
+}
+
+function handleSlotError(s) {
+    if (!wantsPlay || !broadcasting) return;
+    if (s.id === activeSlot) {
+        // Aktif slot hata → standby hazır mı?
+        const sb = slots[standbySlot];
+        if (sb.ready) {
+            switchToStandby();
         } else {
-            wantsPlay = true; retryN = 0;
-            connect();
+            // Standby henüz hazır değil → kısa bekle, yeniden dene
+            killSlot(s);
+            setTimeout(() => { if (wantsPlay && broadcasting) openSlot(s, null); }, 200);
         }
+    } else {
+        // Standby hata → yeniden aç
+        killSlot(s);
+        setTimeout(() => { if (wantsPlay && broadcasting) openSlot(s, null); }, 500);
     }
-    playBtn.addEventListener('click',    handleInteract);
-    playBtn.addEventListener('touchend', handleInteract, { passive: false });
+}
 
-    // ─── Status polling
-    async function poll() {
-        try {
-            const ctrl = new AbortController();
-            const tid  = setTimeout(() => ctrl.abort(), 4000);
-            const res  = await fetch(API + '/status', { cache: 'no-store', signal: ctrl.signal, headers: HDRS });
-            clearTimeout(tid);
-            if (!res.ok) throw 0;
-            const data = await res.json();
+// ── Ses kesintisiz geçiş: standby → active
+function switchToStandby() {
+    const prev = slots[activeSlot];
+    const next = slots[standbySlot];
 
-            const wasBroadcasting = broadcasting;
-            setBroadcast(data.broadcasting);
-
-            if (data.broadcasting) {
-                if (data.song !== currentSong) {
-                    setTitle(data.song); currentSong = data.song;
-                    footerInfo.textContent = 'Canlı yayın';
-                }
-                const songChanged = currentStart && data.start_time && currentStart !== data.start_time;
-                currentStart = data.start_time;
-                if (songChanged && st === ST.PLAYING) { retryN = 0; connect(); }
-                if (!wasBroadcasting && wantsPlay) { retryN = 0; connect(); }
-            } else {
-                if (currentSong !== '—') { setTitle('—'); currentSong = '—'; }
-                currentStart = 0;
-                footerInfo.textContent = 'Yayın bekleniyor';
-                if (st !== ST.IDLE) stop();
-            }
-        } catch(e) {
-            setBroadcast(false);
-            setTitle('—'); currentSong = '—'; currentStart = 0;
-            footerInfo.textContent = 'Bağlantı yok';
-            if (st !== ST.IDLE) setSt(ST.IDLE);
-        }
+    if (!next.ready || !next.audio) {
+        // Standby hazır değil → zorla yeniden bağlan
+        killSlot(prev);
+        openSlot(prev, null);
+        return;
     }
 
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) return;
-        poll();
-        if (wantsPlay && broadcasting && st === ST.IDLE) { retryN = 0; connect(); }
+    // Önceki slotu kapat
+    killSlot(prev);
+
+    // Yeni slotu aktif yap, ses aç
+    activeSlot  = next.id;
+    standbySlot = prev.id;
+    next.audio.volume = vol;
+    next.audio.play().catch(() => {});
+
+    // Eski (şimdi standby) slotu yeniden hazırla
+    const newStandby = slots[standbySlot];
+    setTimeout(() => {
+        if (wantsPlay && broadcasting) openSlot(newStandby, null);
+    }, 500);
+}
+
+// ── Start / Stop
+function startStreaming() {
+    loading = true; playing = false; updateUI();
+
+    activeSlot  = 0;
+    standbySlot = 1;
+
+    // Aktif slotu aç, hazır olunca playing yap
+    openSlot(slots[0], (s) => {
+        if (s.id !== activeSlot) return;
+        // Aktif slot hazır → oynat
+        if (s.audio && s.audio.paused) s.audio.play().catch(() => {});
+        loading = false; playing = true; updateUI();
+        // Standby'ı da aç
+        setTimeout(() => {
+            if (wantsPlay && broadcasting) openSlot(slots[1], null);
+        }, 2000);
     });
-    window.addEventListener('online',  () => { poll(); if (wantsPlay && broadcasting) { retryN = 0; connect(); } });
-    window.addEventListener('offline', () => { setBroadcast(false); });
 
+    slots[0].audio && slots[0].audio.addEventListener('playing', () => {
+        if (slots[0].id === activeSlot) { loading = false; playing = true; updateUI(); }
+    }, { once: true });
+}
+
+function stopAll() {
+    wantsPlay = false;
+    slots.forEach(killSlot);
+    loading = false; playing = false; updateUI();
+}
+
+// ── Audio event monitoring (aktif slot için)
+function watchActiveSlot() {
+    setInterval(() => {
+        if (!wantsPlay || !playing) return;
+        const s = slots[activeSlot];
+        if (!s.audio) return;
+        // readyState 0 veya 1 → ses durdu
+        if (s.audio.readyState < 2 && !s.audio.paused) return; // yükleniyor olabilir
+        if (s.audio.paused && playing) {
+            // Ses durdu → standby devreye al
+            const sb = slots[standbySlot];
+            if (sb.ready) switchToStandby();
+            else { loading = true; playing = false; updateUI(); openSlot(s, (ss) => { loading = false; playing = true; updateUI(); }); }
+        }
+    }, 300);
+}
+
+// ── Buton
+let lastTap = 0;
+function handleInteract(e) {
+    e.preventDefault(); e.stopPropagation();
+    const now = Date.now();
+    if (now - lastTap < 300) return;
+    lastTap = now;
+    if (!broadcasting) return;
+    if (playing || loading) { stopAll(); }
+    else { wantsPlay = true; startStreaming(); }
+}
+$playBtn.addEventListener('click',    handleInteract);
+$playBtn.addEventListener('touchend', handleInteract, { passive: false });
+
+// ── Status polling
+async function poll() {
+    try {
+        const ctrl = new AbortController();
+        const tid  = setTimeout(() => ctrl.abort(), 4000);
+        const res  = await fetch(STATUS_URL, { cache: 'no-store', signal: ctrl.signal, headers: HDRS });
+        clearTimeout(tid);
+        if (!res.ok) throw 0;
+        const data = await res.json();
+
+        const wasBroadcasting = broadcasting;
+        setBroadcast(data.broadcasting);
+
+        if (data.broadcasting) {
+            if (data.song !== currentSong) {
+                setTitle(data.song); currentSong = data.song;
+                $footer.textContent = 'Canlı yayın';
+            }
+            const songChanged = currentStart && data.start_time && currentStart !== data.start_time;
+            currentStart = data.start_time;
+            if (songChanged && playing) {
+                // Şarkı değişti → yeniden bağlan
+                stopAll(); wantsPlay = true; startStreaming();
+            }
+            if (!wasBroadcasting && wantsPlay) startStreaming();
+        } else {
+            if (currentSong !== '—') { setTitle('—'); currentSong = '—'; }
+            currentStart = 0;
+            $footer.textContent = 'Yayın bekleniyor';
+            if (playing || loading) stopAll();
+        }
+    } catch(e) {
+        setBroadcast(false);
+        setTitle('—'); currentSong = '—'; currentStart = 0;
+        $footer.textContent = 'Bağlantı yok';
+    }
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
     poll();
-    setInterval(poll, POLL_MS);
+    if (wantsPlay && broadcasting && !playing && !loading) startStreaming();
+});
+window.addEventListener('online',  () => { poll(); if (wantsPlay && broadcasting) startStreaming(); });
+window.addEventListener('offline', () => setBroadcast(false));
+
+watchActiveSlot();
+poll();
+setInterval(poll, POLL_MS);
 })();
 </script>
 </body>
