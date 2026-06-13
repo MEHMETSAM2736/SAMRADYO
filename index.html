@@ -452,12 +452,7 @@ async function poll() {
                 setTitle(data.song); currentSong = data.song;
                 $footer.textContent = 'Canlı yayın';
             }
-            const songChanged = currentStart && data.start_time && currentStart !== data.start_time;
             currentStart = data.start_time;
-            if (songChanged && playing) {
-                // Şarkı değişti → yeniden bağlan
-                stopAll(); wantsPlay = true; startStreaming();
-            }
             if (!wasBroadcasting && wantsPlay) startStreaming();
         } else {
             if (currentSong !== '—') { setTitle('—'); currentSong = '—'; }
